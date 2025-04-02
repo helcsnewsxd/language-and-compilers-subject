@@ -16,9 +16,9 @@ El equipo docente está conformado por:
 
 ### Teórico
 
-| Temas | Descripción | Filminas | Libro/Apunte | Resumen |
-| ----- | ----------- | -------- | ------------ | ------- |
-|       |             |          |              |         |
+| Temas                                                  | Descripción                                                                | Filminas                                                                                                                                                                   | Libro/Apunte                                 | Resumen |
+| ------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ------- |
+| Introducción a la sintaxis y la semántica de lenguajes | Gramáticas abstractas <br /> Función semántica <br /> Variables y ligadura | [PDF (1)](./theory/slides/01-part_1-abstract_sintax_and_semantic.pdf) <br /> [PDF (2)](./theory/slides/01-part_2-free_and_bound_variable_coincidence_and_substitution.pdf) | [PDF](./theory/notes/01-abstract_sintax.pdf) |         |
 
 ### Práctico
 
