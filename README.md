@@ -22,6 +22,7 @@ El equipo docente está conformado por:
 
 ### Práctico
 
-| Guía | Enunciados | Soluciones |
-| ---- | ---------- | ---------- |
-|      |            |            |
+| Guía | Enunciados                           | Soluciones |
+| ---- | ------------------------------------ | ---------- |
+| 1    | [PDF](./exercises/statements/01.pdf) |            |
+| 2    | [PDF](./exercises/statements/02.pdf) |            |
