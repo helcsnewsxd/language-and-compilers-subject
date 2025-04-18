@@ -1,0 +1,250 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage[dvipsnames]{xcolor}
+
+\geometry{
+  a4paper,
+  total = {170mm, 257mm},
+  left = 20mm,
+  top = 20mm,
+}
+\graphicspath{ {./images/} }
+
+\newcommand{\aexp}[1]{\langle\text{#1}\rangle}
+\newcommand{\intexp}{\aexp{intexp}}
+\newcommand{\sem}[1]{\llbracket #1\rrbracket}
+
+\newcommand{\N}{\mathbb{N}}
+
+
+\title{Trabajo práctico N° 1}
+\author{Emanuel Nicolás Herrador}
+\date{Abril 2025}
+
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 1em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+\noindent\begin{tabular}{@{}ll}
+	Estudiante & \theauthor \\
+\end{tabular}
+
+\section*{Ejercicio 1}
+Consideramos la gramática dada por:
+\begin{equation*}
+	\intexp ::= 0\ |\ 1\ |\ 2\ |\ \dots\ |\ -\intexp\ |\ \intexp + \intexp\ |\ \intexp * \intexp
+\end{equation*}
+
+Con esta en consideración, es trivial nota que las frases ambiguas son $-7*2$ y $27+3+-7$.
+La primera por el orden en que se debe aplicar el menos y el por, y la segunda por cómo debemos asociar la suma.
+
+Para resolver esta ambigüedad, debe usarse precedencia de la multiplicación sobre la negación en el primer caso, y en el segundo, asociatividad.
+
+\section*{Ejercicio 2}
+Para cada caso, queremos ver qué símbolos pertenecen al lenguaje objeto y cuáles al metalenguaje.
+
+\subsection*{Item A: $\sem{0} = 0$}
+El $0$ de la izquierda pertenece al lenguaje objeto y el $0$ de la derecha al lenguaje de los enteros.
+
+\subsection*{Item B: $\sem{-e} = -\sem{e}$}
+El $-$ de la izquierda pertenece al lenguaje objeto y el de la derecha al lenguaje de los enteros.
+El $e$ es una metavariable del lenguaje.
+
+\subsection*{Item C: $\sem{e+f} = \sem{e} + \sem{f}$}
+El $+$ de la izquierda pertenece al lenguaje objeto y el de la derecha al lenguaje de los enteros.
+Tanto $e$ como $f$ son metavariables del lenguaje.
+
+\section*{Ejercicio 3}
+Dada la gramática de expresiones enteras considerada en el teórico, es decir la del primer ejercicio; y dadas las ecuaciones semánticas dirigidas por sintaxis definidas, entonces podemos resolver la semántica de ambas expresiones.
+
+\subsection*{Item A: $\sem{0*(5*(7+2))}$}
+\begin{equation*}
+	\begin{aligned}
+		\sem{0*(5*(7+2))} & = \sem{0} * \sem{5*(7+2)}       \\
+		                  & = 0 * (\sem{5} * \sem{7+2})     \\
+		                  & = 0 * (5 * (\sem{7} + \sem{2})) \\
+		                  & = 0 * (5 * (7 + 2))             \\
+		                  & = 0
+	\end{aligned}
+\end{equation*}
+
+\subsection*{Item B: $\sem{a*a+a*b+b*a+b*b}$}
+Considero asociatividad a izquierda:
+\begin{equation*}
+	\begin{aligned}
+		\sem{a*a+a*b+b*a+b*b} & = \sem{a*a} + \sem{a*b+b*a+b*b}                 \\
+		                      & = \sem{a}*\sem{a} + \sem{a*b} + \sem{b*a+b*b}   \\
+		                      & = a*a + \sem{a}*\sem{b} + \sem{b*a} + \sem{b*b} \\
+		                      & = a*a + a*b + \sem{b}*\sem{a} + \sem{b}*\sem{b} \\
+		                      & = a*a + a*b + b*a + b*b                         \\
+		                      & = a^2 + 2ab + b^2                               \\
+		                      & = (a + b)^2
+	\end{aligned}
+\end{equation*}
+
+\section*{Ejercicio 4}
+Se considera la siguiente gramática y ecuaciones semánticas con precedencia habitual entre $*$ y $+$:
+\begin{equation*}
+	\begin{aligned}
+		\intexp        & ::= 1\ |\ \intexp + \intexp\ |\ \intexp * \intexp \\
+		\sem{1}        & = 1                                               \\
+		\sem{e+e'}     & = \sem{e}+\sem{e'}                                \\
+		\sem{e*1}      & = \sem{e}                                         \\
+		\sem{e*(e'+1)} & = \sem{e*e'}+\sem{e}
+	\end{aligned}
+\end{equation*}
+
+\subsection*{Item A}
+El conjunto de ecuaciones no define una función semántica porque no es total ya que no tiene definición para $\sem{1*(1*1)}$.
+
+\subsection*{Item B}
+Se garantiza que para las frases con significado este sea único, dado que para toda frase representada por las ecuaciones semánticas, solo una de ellas se aplica a la expresión (obviando recursividad, claro).
+Es decir, no existe ninguna producción de la gramática que pueda tomar dos ``caminos'' en las definiciones.
+
+\subsection*{Item C}
+No es dirigido por sintaxis el conjunto de ecuaciones porque no hay una ecuación por cada producción de la gramática abstracta.
+
+\subsection*{Item D}
+No es composicional y se puede ver por contraejemplo.
+Notemos que $\sem{1*1}=1$ y que $\sem{1}=1$ pero $\sem{1*(1*1)}$ no está definida.
+Luego, $\sem{1*1}$ y $\sem{1*(1*1)}$ no tienen iguales significados.
+
+\section*{Ejercicio 5}
+Consideremos la siguiente gramática abstracta para números binarios:
+\begin{equation*}
+	\aexp{bin} ::= 0\ |\ 1\ |\ 0\aexp{bin}\ |\ 1\aexp{bin}
+\end{equation*}
+
+\subsection*{Item A}
+Dada la función:
+\begin{equation*}
+	\begin{aligned}
+		\sem{\_}^s                        & : \aexp{bin} \to \N                       \\
+		\sem{\alpha_0\dots\alpha_{n-1}}^s & = \sum\limits_{i=1}^n \alpha_{i-1}2^{n-i}
+	\end{aligned}
+\end{equation*}
+
+No es dirigida por sintaxis porque no está definido puramente en base a sus subfrases inmediatas, sino que usa el largo de la expresión para ello.
+No es composicional por contraejemplo dado que $\sem{01}=0*2^1+1*2^0=1$ y $\sem{11}=1*2^1+1*2^0=3$ pero $\sem{101}=1*2^2+0*2^1+1*2^0\neq\sem{11}$.
+
+\subsection*{Item B}
+Ahora, si consideramos la definición dada por $\sem{\alpha\alpha_1\dots\alpha_{n-1}}^i = \alpha 2^{n-1}+\sem{\alpha_1\dots\alpha_{n-1}}^i$, tenemos que tampoco es dirigida por sintaxis porque no se define exclusivamente de los significados de sus subfrases inmediatas sino que usa también el largo.
+Otra forma de mostrarlo es viendo que no es composicional dado que $\sem{11}\neq\sem{101}$ y, por ende, no puede ser dirigido por sintaxis.
+
+\subsection*{Item C}
+No se puede dar un conjunto de ecuaciones dirigidas por sintaxis para esta función dado que siempre va a depender del largo del número binario, lo cual no es una subfrase inmediata.
+
+\section*{Ejercicio 6}
+No, el argumento no es correcto porque lo importante no es que la frase completa cambie de denotación, sino que cambia su significado al hacer el reemplazo.
+Es decir, el hecho de que cambie de denotación no es lo que genera que no sea composicional, sino que esto se produce porque el significado es otro.
+
+Esto se puede ver porque $\sem{01}=\sem{1}$ aunque se denoten distinto.
+
+\section*{Ejercicio 7}
+Como bien se dijo en ejercicios anteriores, no se puede definir una función dirigida por sintaxis para la semántica de números binarios si el largo de este no podemos considerarlo de alguna forma.
+Por ello, se tendrá ahora en cuenta una función $\sem{\_}^p:\aexp{bin}\to\N\times\N$ tal que $\pi_1\sem{e}^p=\sem{e}^s$.
+Aquí, la función es:
+\begin{equation*}
+	\begin{aligned}
+		\sem{0}  & = (0, 1)                                                \\
+		\sem{1}  & = (1, 1)                                                \\
+		\sem{0e} & = (\pi_1\sem{e}, 1+\pi_2\sem{e})                        \\
+		\sem{1e} & = (2^{\pi_2\sem{e}} + \pi_1{\sem{e}}, 1 + \pi_2\sem{e})
+	\end{aligned}
+\end{equation*}
+
+Claramente es dirigido por sintaxis y es trivial notar que la proyección de la primer coordenada se corresponde al significado de las funciones mostradas en el ejercicio $5$.
+
+\section*{Ejercicio 8}
+\subsection*{Item A}
+Para extender el lenguaje de las expresiones aritméticas agregando la división entera, si queremos que siga siendo dirigido por sintaxis y solo agregar la división a la gramática (i.e., ninguna otra constante), entonces podemos darle un significado arbitrario.
+Es decir, podemos decir que todo número dividido por $0$ es igual a $0$.
+
+De este modo, consideramos:
+\begin{equation*}
+	\begin{aligned}
+		\intexp                & ::= 0\ |\ 1\ |\ \dots\ |\ -\intexp\ |\ \intexp + \intexp\  \\
+		                       & \qquad\qquad |\ \intexp * \intexp\ |\ \intexp \div \intexp \\
+		\sem{\lfloor n\rfloor} & = n                                                        \\
+		\sem{-e}               & = -\sem{e}                                                 \\
+		\sem{e + e'}           & = \sem{e} + \sem{e'}                                       \\
+		\sem{e * e'}           & = \sem{e} * \sem{e'}                                       \\
+		\sem{e \div e'}        & = \begin{cases}
+			                           0                     & \text{si }\sem{e'}=0 \\
+			                           \sem{e} \div \sem{e'} & \text{cc.}
+		                           \end{cases}
+	\end{aligned}
+\end{equation*}
+
+\subsection*{Item B}
+\begin{equation*}
+	\begin{aligned}
+		\sem{2 \div 0} & = \begin{cases}
+			                   0        & \text{si }\sem{0}=0 \\
+			                   2 \div 0 & \text{cc.}
+		                   \end{cases} \\
+		               & = \begin{cases}
+			                   0        & \text{si }0=0 \\
+			                   2 \div 0 & \text{cc.}
+		                   \end{cases}       \\
+		               & = 0
+	\end{aligned}
+\end{equation*}
+
+\section*{Ejercicio 9}
+Ahora, la idea va a ser extender el lenguaje de las expresiones aritméticas agregando la división entera, pero también la constante $\text{error}$ para el caso de la división por $0$.
+
+\subsection*{Item A}
+Vamos a considerar:
+\begin{equation*}
+	\begin{aligned}
+		\intexp                & ::= \text{error}\ |\ 0\ |\ 1\ |\ \dots\ |\ -\intexp\ |\ \intexp + \intexp\                     \\
+		                       & \qquad\qquad |\ \intexp * \intexp\ |\ \intexp \div \intexp                                     \\
+		\sem{\lfloor n\rfloor} & = n                                                                                            \\
+		\sem{-e}               & = \begin{cases}
+			                           \text{error} & \text{si }\sem{e}=\text{error} \\
+			                           -\sem{e}     & \text{cc.}
+		                           \end{cases}                                                \\
+		\sem{e+e'}             & =\begin{cases}
+			                          \text{error}       & \text{si }\sem{e}=\text{error}\lor\sem{e'}=\text{error} \\
+			                          \sem{e} + \sem{e'} & \text{cc.}
+		                          \end{cases}                  \\
+		\sem{e*e'}             & =\begin{cases}
+			                          \text{error}       & \text{si }\sem{e} = \text{error} \lor \sem{e'} = \text{error} \\
+			                          \sem{e} * \sem{e'} & \text{cc.}
+		                          \end{cases}            \\
+		\sem{e \div e'}        & = \begin{cases}
+			                           \text{error}          & \text{si }\sem{e} = \text{error} \lor \sem{e'}\in\{\text{error}, 0\} \\
+			                           \sem{e} \div \sem{e'} & \text{cc.}
+		                           \end{cases}
+	\end{aligned}
+\end{equation*}
+
+\subsection*{Item B}
+Para calcular $\sem{(7+(2 \div (5*0)))}$, sería bastante ilegible hacer el ``paso por paso'' por cómo se definieron las ecuaciones semánticas.
+Por ello mismo, se deja sin realizar porque es algo trivial de hacer también.
+
+\end{document}

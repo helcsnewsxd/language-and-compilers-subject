@@ -29,10 +29,10 @@ El equipo docente está conformado por:
 
 <div align="center">
 
-| Guía | Enunciados                           | Soluciones |
-| ---- | ------------------------------------ | ---------- |
-| 1    | [PDF](./exercises/statements/01.pdf) |            |
-| 2    | [PDF](./exercises/statements/02.pdf) |            |
-| 3    | [PDF](./exercises/statements/03.pdf) |            |
+| Guía | Enunciados                           | Soluciones                          |
+| ---- | ------------------------------------ | ----------------------------------- |
+| 1    | [PDF](./exercises/statements/01.pdf) | [PDF](./exercises/solutions/01.pdf) |
+| 2    | [PDF](./exercises/statements/02.pdf) |                                     |
+| 3    | [PDF](./exercises/statements/03.pdf) |                                     |
 
 </div>
