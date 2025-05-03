@@ -1,0 +1,886 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+
+\geometry{
+  a4paper,
+  total = {170mm, 257mm},
+  left = 20mm,
+  top = 20mm,
+}
+\graphicspath{ {./images/} }
+
+\newcommand{\addfig}[2]{\begin{figure}[!htb] \centering \includegraphics[width=#1\textwidth]{#2}\end{figure}}
+
+\newcommand{\aexp}[1]{\langle\text{#1}\rangle}
+\newcommand{\intexp}{\aexp{intexp}}
+\newcommand{\var}{\aexp{var}}
+\newcommand{\assert}{\aexp{assert}}
+\newcommand{\boolexp}{\aexp{boolexp}}
+\newcommand{\comm}{\aexp{comm}}
+\newcommand{\sem}[1]{\left\llbracket #1\right\rrbracket}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\B}{\mathbb{B}}
+
+\newcommand{\x}{\textbf{x}}
+\newcommand{\y}{\textbf{y}}
+\newcommand{\z}{\textbf{z}}
+
+\newcommand{\supr}{\bigsqcup\limits}
+
+\newcommand{\fleq}{\sqsubseteq}
+\newcommand{\cdom}{\Sigma \to \Sigma_\bot}
+\newcommand{\cfbot}{\bot_{\cdom}}
+\newcommand{\bbot}{\bot\!\!\!\bot}
+\newcommand{\ctrue}{\textbf{true}}
+\newcommand{\cfalse}{\textbf{false}}
+\newcommand{\cskip}{\textbf{skip}}
+\newcommand{\cif}[3]{\textbf{if }#1\textbf{ then }#2\textbf{ else }#3}
+\newcommand{\cnewvar}[3]{\textbf{newvar }#1 := #2\textbf{ in }#3}
+\newcommand{\cwhile}[2]{\textbf{while }#1\textbf{ do }#2}
+\newcommand{\cfor}[4]{\textbf{for }#1 := #2\text{ to }#3\text{ do }#4}
+
+\title{Trabajo práctico N° 4}
+\author{Emanuel Nicolás Herrador}
+\date{Mayo 2025}
+
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 1em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+\noindent\begin{tabular}{@{}ll}
+	Estudiante & \theauthor \\
+\end{tabular}
+
+\section*{Ejercicio 1}
+Queremos ver si se demuestran o refutan las equivalencias de comandos que se proponen en los siguientes items.
+
+\subsection*{Item A}
+Queremos ver que $c; \cskip \equiv c$.
+Sea $\sigma \in \Sigma$, se cumple que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{c; \cskip}\sigma &= \sem{\cskip}_{\bbot}(\sem{c}\sigma) \\ 
+                          &= \begin{cases}
+                            \bot &\text{ si }\sem{c}\sigma = \bot \\ 
+                            \sem{skip}(\sem{c}\sigma) &\text{ cc. }
+                          \end{cases} \\ 
+                          &= \begin{cases}
+                            \bot &\text{ si }\sem{c}\sigma = \bot \\ 
+                            \sem{c}\sigma &\text{ cc. }
+                          \end{cases} \\ 
+                          &= \sem{c}\sigma 
+  \end{aligned}
+\end{equation*}
+por lo que se demuestra la equivalencia propuesta. $\qed$
+
+\subsection*{Item B}
+Queremos ver si $c_1; (c_2; c_3) \equiv (c_1; c_2); c_3$.
+Sea $\sigma \in \Sigma$ notemos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{c1; (c_2; c_3)}\sigma &= \sem{c_2; c_3}_{\bbot}(\sem{c_1}\sigma) \\ 
+                               &= \sem{c_3}_{\bbot}(\sem{c_2}_{\bbot}(\sem{c_1}\sigma)) \\ 
+                               &= \sem{c_3}_{\bbot}(\sem{c1; c2}\sigma) \\ 
+                               &= \sem{(c_1; c_2); c_3}\sigma
+  \end{aligned}
+\end{equation*}
+por lo que se demuestra la equivalencia propuesta. $\qed$.
+
+\subsection*{Item C}
+Queremos ver si $(\cif{b}{c_0}{c_1});c_2 \equiv \cif{b}{c_0;c_2}{c_1;c_2}$.
+Sea $\sigma \in \Sigma$, notemos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{(\cif{b}{c_0}{c_1});c_2}\sigma &= \sem{c_2}_{\bbot}(\sem{\cif{b}{c_0}{c_1}}\sigma) \\ 
+                                        &= \begin{cases}
+                                          \sem{c_2}_{\bbot}(\sem{c_0}\sigma) &\text{ si }\sem{b}\sigma \\ 
+                                          \sem{c_2}_{\bbot}(\sem{c_1}\sigma) &\text{ cc. }
+                                        \end{cases} \\ 
+                                        &= \begin{cases}
+                                          \sem{c_0; c_2}\sigma & \text{ si }\sem{b}\sigma \\ 
+                                          \sem{c_1; c_2}\sigma & \text{ cc. }
+                                        \end{cases} \\ 
+                                        &= \sem{\cif{b}{c_0; c_2}{c_1; c_2}}\sigma
+  \end{aligned}
+\end{equation*}
+por lo que se demuestra la equivalencia propuesta. $\qed$
+
+\subsection*{Item D}
+Queremos ver si $c_2; (\cif{b}{c_0}{c_1}) \equiv \cif{b}{c_2; c_0}{c_2; c_1}$.
+Sea $\sigma \in \Sigma$, veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{c_2; (\cif{b}{c_0}{c_1})}\sigma &= \sem{(\cif{b}{c_0}{c_1})}_{\bbot}(\sem{c_2}\sigma) \\ 
+                                         &= \begin{cases}
+                                           \bot & \text{ si }\sem{c_2}\sigma = \bot \\ 
+                                           \sem{c_0}(\sem{c_2}\sigma) & \text{ si }\sem{c_2}\sigma \neq \bot \land \sem{b}(\sem{c_2}\sigma) \\ 
+                                           \sem{c_1}(\sem{c_2}\sigma) & \text{ si }\sem{c_2}\sigma \neq \bot \land \neg\sem{b}(\sem{c_2}\sigma)
+                                         \end{cases} \\ 
+                                         \\ 
+    \sem{\cif{b}{c_2;c_0}{c_2;c_1}}\sigma &= \begin{cases}
+                                      \sem{c_2; c_0}\sigma &\text{ si }\sem{b}\sigma \\ 
+                                      \sem{c_2; c_1}\sigma &\text{ cc. }
+                                    \end{cases} \\ 
+                                  &= \begin{cases}
+                                      \sem{c_0}_{\bbot}(\sem{c_2}\sigma) & \text{ si }\sem{b}\sigma \\ 
+                                      \sem{c_1}_{\bbot}(\sem{c_2}\sigma) & \text{ cc. }
+                                    \end{cases} \\ 
+                                  &= \begin{cases}
+                                    \bot & \text{ si }\sem{c_2}\sigma = \bot \\ 
+                                    \sem{c_0}(\sem{c_2}\sigma) & \text{ si }\sem{c_2}\sigma \neq \bot \land \sem{b}\sigma \\ 
+                                    \sem{c_1}(\sem{c_2}\sigma) & \text{ si }\sem{c_2}\sigma \neq \bot \land \neg\sem{b}\sigma
+                                  \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Con ello, entonces, puede observarse que no son equivalentes debido a que los estados en los que se evalúa la condición $b$ pueden ser distintos.
+
+\subsection*{Item E}
+Queremos ver si $x := y; z := w \equiv z := w; x := y$.
+Si bien es claro que no se va a cumplir esta equivalencia, lo veamos por la semántica.
+Sea $\sigma \in \Sigma$, veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{x := y; z := w}\sigma &= \sem{z := w}_{\bbot}(\sem{x := y}\sigma) \\ 
+                               &= \sem{z := w}_{\bbot}[\sigma | x : \sem{y}\sigma] \\ 
+                               &= \sem{z := w}[\sigma | x : y] \\ 
+                               &= [\sigma | x : y | z : \sem{w}\sigma] \\ 
+                               &= [\sigma | x : y | z : w] \\ 
+                               \\ 
+    \sem{z := w; x := y}\sigma &= \sem{x := y}_{\bbot}(\sem{z := w}\sigma) \\ 
+                               &= \sem{x := y}_{\bbot}[\sigma | z : \sem{w}\sigma] \\ 
+                               &= \sem{x := y}[\sigma | z : w] \\ 
+                               &= [\sigma | z : w | x : \sem{y}\sigma] \\ 
+                               &= [\sigma | z : w | x : y]
+  \end{aligned}
+\end{equation*}
+
+Con ello, entonces, puede observarse que no son equivalentes debido a que en este ejercicio al no estar en negrita y letra uniforme, no se tratan de variables sino de metavariables.
+Luego, esto significa que si consideramos una asignación de variables dada por $x \to \textbf{x},\ y \to \textbf{y},\ z \to \textbf{x},\ w \to \textbf{w}$ entonces es claro que los estados resultantes son diferentes.
+Esto es debido a que $[\sigma | \textbf{x} : \textbf{y} | \textbf{x} : \textbf{w}] = [\sigma | \textbf{x} : \textbf{w}]$ pero $[\sigma | \textbf{x} : \textbf{w} | \textbf{x} : \textbf{y}] = [\sigma | \textbf{x} : \textbf{y}]$.
+
+\section*{Ejercicio 2}
+El ejercicio es similar al anterior, pero ahora con $\textbf{newvar}$.
+
+\subsection*{Item A}
+Queremos ver si es correcta la equivalencia $\cnewvar{\x}{e}{\cskip} \equiv \cskip$.
+Sea $\sigma \in \Sigma$, veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \cnewvar{\x}{e}{\cskip} &= (\lambda \sigma' \in \Sigma . [\sigma' | \x : \sigma \x])_{\bbot}(\sem{\cskip}[\sigma | \x : \sem{e}\sigma]) \\ 
+                            &= (\lambda \sigma' \in \Sigma . [\sigma' | \x : \sigma \x][\sigma | \x : \sem{e}\sigma]) \\ 
+                            &= [\sigma | \x : \sem{e}\sigma | \x : \sigma \x] \\ 
+                            &= \sigma \\ 
+                            &= \sem{\cskip}\sigma
+  \end{aligned}
+\end{equation*}
+por lo que, entonces, se demuestra la equivalencia. $\qed$
+
+\subsection*{Item B}
+Queremos ver si es correcta la equivalencia $\cnewvar{\x}{e}{\y := \x} \equiv \y := e$.
+Sea $\sigma \in \Sigma$, veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cnewvar{\x}{e}{\y := \x}}\sigma &= (\lambda \sigma' \in \Sigma . [\sigma' | \x : \sigma \x])_{\bbot}(\sem{\y := \x}[\sigma | \x : \sem{e}\sigma]) \\ 
+                                          &= (\lambda \sigma' \in \Sigma . [\sigma' | \x : \sigma \x])[\sigma | \x : \sem{e}\sigma | \y : \sem{\x}[\sigma | \x : \sem{e}\sigma]] \\ 
+                                          &= (\lambda \sigma' \in \Sigma . [\sigma' | \x : \sigma \x])[\sigma | \x : \sem{e}\sigma | \y : \sem{e}\sigma] \\
+                                          &= [\sigma | \x : \sem{e}\sigma | \y : \sem{e}\sigma | \x : \sigma \x] \\ 
+                                          &= [\sigma | \y : \sem{e}\sigma] \\ 
+                                          &= \sem{\y := e}\sigma
+  \end{aligned}
+\end{equation*}
+por lo que, entonces, se demuestra la equivalencia. $\qed$
+
+\subsection*{Item C}
+Queremos ver si es correcta la siguiente equivalencia
+\begin{equation*}
+  \cnewvar{\x}{e_1}{(\cnewvar{\y}{e_2}{c})} \equiv \cnewvar{\y}{e_2}{(\cnewvar{\x}{e_1}{c})}
+\end{equation*}
+
+Sea $\sigma \in \Sigma$, veamos que:
+\begin{equation*}
+  \begin{aligned}
+    &\sem{\cnewvar{\x}{e_1}{(\cnewvar{\y}{e_2}{c})}}\sigma = \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x])_{\bbot}(\sem{\cnewvar{\y}{e_2}{c}}[\sigma\ |\ \x : \sem{e_1}\sigma]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x])_{\bbot}\left((\lambda \sigma'' \in \Sigma . [\sigma''\ |\ \y : [\sigma\ |\ \x : \sem{e_1}\sigma] \y])_{\bbot} \sem{c}[\sigma\ |\ \x : \sem{e_1}\sigma\ |\ \y : \sem{e_2}[\sigma\ |\ \x : \sem{e_1}\sigma]]\right) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y])_{\bbot} (\sem{c}[\sigma\ |\ \x : \sem{e_1}\sigma\ |\ \y : \sem{e_2}[\sigma\ |\ \x : \sem{e_1}\sigma]]) \\ 
+    \\ 
+    &\sem{\cnewvar{\y}{e_2}{(\cnewvar{\x}{e_1}{c})}}\sigma = \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \y : \sigma \y])_{\bbot}(\sem{\cnewvar{\x}{e_1}{c}}[\sigma\ |\ \y : \sem{e_2}\sigma]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \y : \sigma \y])_{\bbot}\left((\lambda \sigma'' \in \Sigma . [\sigma''\ |\ \x : [\sigma\ |\ \y : \sem{e_2}\sigma] \x])_{\bbot} \sem{c}[\sigma\ |\ \y : \sem{e_2}\sigma\ |\ \x : \sem{e_1}[\sigma\ |\ \y : \sem{e_2}\sigma]]\right) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \y : \sigma \y\ |\ \x : \sigma \x])_{\bbot} (\sem{c}[\sigma\ |\ \y : \sem{e_2}\sigma\ |\ \x : \sem{e_1}[\sigma\ |\ \y : \sem{e_2}\sigma]]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y])_{\bbot} (\sem{c}[\sigma\ |\ \x : \sem{e_1}[\sigma\ |\ \y : \sem{e_2}\sigma]\ |\ \y : \sem{e_2}\sigma])
+  \end{aligned}
+\end{equation*}
+
+Luego, claramente no son equivalentes y esto lo podemos mostrar presentando un contraejemplo de ello.
+Consideremos $c = \z := \y,\ e_1 = \x + 1,\ e_2 = \x$.
+Con ello, tenemos para cada caso que:
+\begin{equation*}
+  \begin{aligned}
+    &\sem{\cnewvar{\x}{\x + 1}{(\cnewvar{\y}{\x}{\z := \y})}}\sigma = \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y])_{\bbot} (\sem{\z := \y}[\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x}[\sigma | \x : \sem{\x + 1}\sigma]]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y])_{\bbot} (\sem{\z := \y}[\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x + 1}\sigma]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y])_{\bbot} [\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x + 1}\sigma\ |\ \z : [\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x + 1}\sigma] \y] \\
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y]) [\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x + 1}\sigma\ |\ \z : \sem{\x + 1}\sigma] \\ 
+    &= [\sigma\ |\ \z : \sem{\x + 1}\sigma] \\ 
+    \\ 
+    &\sem{\cnewvar{\y}{\x}{(\cnewvar{\x}{\x + 1}{\z := \y})}}\sigma = \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y])_{\bbot} (\sem{\z := \y}[\sigma\ |\ \x : \sem{\x + 1}[\sigma\ |\ \y : \sem{\x}\sigma]\ |\ \y : \sem{\x}\sigma]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y])_{\bbot} (\sem{\z := \y}[\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x}\sigma]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y]) [\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x}\sigma\ |\ \z : [\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x}\sigma] \y]) \\ 
+    &= (\lambda \sigma' \in \Sigma . [\sigma'\ |\ \x : \sigma \x\ |\ \y : \sigma \y]) [\sigma\ |\ \x : \sem{\x + 1}\sigma\ |\ \y : \sem{\x}\sigma\ |\ \z : \sem{x}\sigma]) \\ 
+    &= [\sigma\ |\ \z : \sem{x}\sigma]
+  \end{aligned}
+\end{equation*}
+por lo que se llegan a estados distintos, lo que significa que entonces no se cumple la equivalencia.
+Por ello, se refuta.
+
+\section*{Ejercicio 3}
+Respecto al punto $(a)$, considero que el parser \textit{no puede} eliminar toda ocurrencia de $\cskip$ porque ello ``rompería'' nuestra sintaxis.
+Un ejemplo de esto es que en el ejercicio $(2a)$ tendríamos $\cnewvar{\x}{e}{}$ lo cual incumple nuestra definición de LIS.
+
+Y, respecto al punto $(b)$, \textit{sí es posible} la elección de cómo asociar las secuencias de comandos.
+Esto se demostró en el ejercicio $(1b)$.
+
+\section*{Ejercicio 4}
+Para este ejercicio vamos a considerar el comando $\cwhile{\ctrue}{x := x-1}$.
+Veamos cada uno de los items a continuación.
+
+\subsection*{Item A}
+Sea $w$ la función que representa la semántica del while, notemos que $w : \Sigma \to \Sigma_\bot$ y que:
+\begin{equation*}
+  \begin{aligned}
+      w \sigma &= \begin{cases}
+              w_{\bbot} (\sem{x := x-1}\sigma) &\text{ si }\sem{\ctrue}\sigma \\ 
+              \sigma & \text{ cc. }
+            \end{cases} \\ 
+               &= w [\sigma\ |\ x : \sem{x}\sigma - 1] \\ 
+               &= w [\sigma | x : \sigma x - 1]
+  \end{aligned}
+\end{equation*}
+
+Con ello, entonces, se puede definir $F : (\Sigma \to \Sigma_\bot) \to (\Sigma \to \Sigma_\bot)$ tal que:
+\begin{equation*}
+  \begin{aligned}
+    F w \sigma &= w [\sigma | x : \sigma x - 1]
+  \end{aligned}
+\end{equation*}
+
+\subsection*{Item B}
+Ahora calculemos primero $F^i \cfbot$ para algunos $i \in \N$:
+\begin{equation*}
+  \begin{aligned}
+    F^0 \cfbot &= \cfbot \\ 
+    \\ 
+    F^1 \cfbot &= \sigma \mapsto \cfbot [\sigma\ |\ x : \sigma x - 1] \\ 
+               &= \sigma \mapsto \bot \\ 
+               &= \cfbot
+  \end{aligned}
+\end{equation*}
+
+Con ello, puede observarse que claramente $F^i \cfbot = \cfbot$.
+Vamos a demostrarlo por inducción.
+El caso base ya está probado, ahora si suponemos que vale para $k \in \N$, queremos verlo para $k+1$:
+\begin{equation*}
+  \begin{aligned}
+    F^{k+1} \cfbot &= F F^k \cfbot \\ 
+                   &= F \cfbot \\ 
+                   &= \cfbot
+  \end{aligned}
+\end{equation*}
+
+Luego, se demuestra que $\forall i \in \N,\ F^i \cfbot = \cfbot$.
+Es decir, no existe ningún $n$ tal que $F^n \cfbot$ no sea bottom.
+
+\subsection*{Item C}
+Consideramos la cadena en $\cdom$ dada por:
+\begin{equation*}
+  w_i \sigma = \begin{cases}
+    \sigma &\text{ si }0\leq \sigma x \leq i \\ 
+    \bot & \text{ cc. }
+  \end{cases}
+\end{equation*}
+
+Con ello, queremos comprobar que dado que $F$ es continua entonces se garantiza $F(\supr w_i) = \supr F w_i$.
+Primero veamos el lado izquierdo de la igualdad:
+\begin{equation*}
+    \begin{aligned}
+      \supr w_i &= \sigma \mapsto \begin{cases}
+        \sigma &\text{ si }\sigma x \in \N \\ 
+        \bot &\text{ cc. }
+      \end{cases} \\ 
+      \\ 
+        F\left(\supr w_i\right) &= \sigma \mapsto \left(\supr w_i\right)[\sigma\ |\ x : \sigma x - 1] \\ 
+                     &= \sigma \mapsto \begin{cases}
+                       [\sigma\ |\ x : \sigma x - 1] &\text{ si }[\sigma\ |\ x : \sigma x - 1] x \in \N \\ 
+                       \bot &\text{ cc. }
+                     \end{cases} \\ 
+                     &= \sigma \mapsto \begin{cases}
+                       [\sigma\ |\ x : \sigma x - 1] &\text{ si }\sigma x \geq 1 \\ 
+                       \bot &\text{ cc. }
+                     \end{cases}
+    \end{aligned}
+\end{equation*}
+
+Ahora, veamos el lado derecho de la igualdad:
+\begin{equation*}
+  \begin{aligned}
+    F w_i &= \sigma \mapsto w_i[\sigma\ |\ x : \sigma x - 1] \\ 
+          &= \sigma \mapsto \begin{cases}
+            [\sigma\ |\ x : \sigma x - 1] &\text{ si }0 \leq [\sigma\ |\ x : \sigma x - 1] x \leq i \\ 
+            \bot & \text{ cc. }
+          \end{cases} \\ 
+          &= \sigma \mapsto \begin{cases}
+            [\sigma\ |\ x : \sigma x - 1] &\text{ si }1 \leq \sigma x \leq i + 1 \\ 
+            \bot &\text{ cc. }
+          \end{cases} \\
+          \\ 
+    \supr F w_i &= \sigma \mapsto \begin{cases}
+      [\sigma\ |\ x : \sigma x - 1] &\text{ si }1 \leq \sigma x \\ 
+      \bot &\text{ cc. }
+    \end{cases} \\ 
+  \end{aligned}
+\end{equation*}
+
+Luego, de este modo, se corrobora la igualdad y, por ende, la conservación del supremo en la cadena $w_0 \leq w_1 \leq \dots$.
+
+\section*{Ejercicio 5}
+Se pretende calcular la semántica denotacional de los comandos presentados a continuación.
+
+\subsection*{Item A}
+Se considera el comando $\cwhile{\x < 2}{\cif{\x < 0}{\x := 0}{\x := \x + 1}}$.
+Sea $w \in \cdom$ la función semántica para el while, notemos que:
+\begin{equation*}
+  \begin{aligned}
+    w \sigma &= \begin{cases}
+      w_{\bbot} (\sem{\cif{\x<0}{\x:=0}{\x:=\x+1}}\sigma) &\text{ si }\sem{\x<2}\sigma \\ 
+      \sigma &\text{ cc. }
+    \end{cases} \\ 
+             &= \begin{cases}
+               w_{\bbot}(\sem{\x:=0}\sigma) &\text{ si }\sem{\x<2}\sigma \land \sem{\x<0}\sigma \\ 
+               w_{\bbot}(\sem{\x:=\x+1}\sigma) &\text{ si }\sem{\x<2}\sigma \land \neg\sem{\x<0}\sigma \\ 
+               \sigma &\text{ cc. }
+             \end{cases} \\ 
+             &= \begin{cases}
+               w [\sigma\ |\ \x : 0] &\text{ si }\sigma \x < 0 \\ 
+               w [\sigma\ |\ \x : \sigma x + 1] &\text{ si }0 \leq \sigma \x < 2 \\ 
+               \sigma &\text{ cc. }
+             \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Sea $F \in (\cdom) \to (\cdom)$, consideramos:
+\begin{equation*}
+  F w \sigma = \begin{cases}
+    w [\sigma\ |\ \x : 0] &\text{ si }\sigma \x < 0 \\ 
+    w [\sigma\ |\ \x : \sigma \x + 1] &\text{ si }0 \leq \sigma \x < 2 \\ 
+    \sigma &\text{ si }2 \leq \sigma \x
+  \end{cases}
+\end{equation*}
+
+Con ello en mente, sabemos que $F$ es continua al ser la semántica de un while por lo que podemos aplicar directamente el TMPF.
+Veamos algunos casos para $F^i \cfbot$:
+\begin{equation*}
+  \begin{aligned}
+    F^0 \cfbot &= \cfbot \\ 
+    \\ 
+    F^1 \cfbot &= \sigma \mapsto \begin{cases}
+      \cfbot [\sigma\ |\ \x : 0] &\text{ si }\sigma \x < 0 \\ 
+      \cfbot [\sigma\ |\ \x : \sigma \x + 1] &\text{ si }0 \leq \sigma \x < 2 \\ 
+      \sigma &\text{ si }2 \leq \sigma \x 
+    \end{cases} \\ 
+               &= \sigma \mapsto \begin{cases}
+                 \bot &\text{ si }\sigma \x < 2 \\ 
+                 \sigma &\text{ si }2 \leq \sigma \x
+               \end{cases} \\ 
+  \end{aligned}
+\end{equation*}
+
+\begin{equation*}
+  \begin{aligned}
+      F^2 \cfbot &= F F \cfbot \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   F \cfbot [\sigma\ |\ \x : 0] &\text{ si }\sigma \x < 0 \\ 
+                   F \cfbot [\sigma\ |\ \x : \sigma \x + 1] &\text{ si }0 \leq \sigma \x < 2 \\ 
+                   \sigma &\text{ si }2 \leq \sigma \x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma \x < 0 \land 0 < 2 \\ 
+                   [\sigma\ |\ \x : 0] &\text{ si }\sigma \x < 0 \land 2 \leq 0 \\ 
+                   \bot &\text{ si }0 \leq \sigma \x < 2 \land \sigma \x + 1 < 2 \\ 
+                   [\sigma\ |\ \x : \sigma \x + 1] &\text{ si } 0 \leq \sigma \x < 2 \land 2 \leq \sigma \x + 1 \\ 
+                   \sigma &\text{ si }2 \leq \sigma \x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma \x \leq 0 \\ 
+                   [\sigma\ |\ \x : \sigma \x + 1] &\text{ si }\sigma \x = 1 \\ 
+                   \sigma &\text{ si }2 \leq \sigma \x 
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma \x \leq 0 \\ 
+                   [\sigma\ |\ \x : \max(2, \sigma \x)] &\text{ si }1 \leq \sigma \x
+                 \end{cases} \\ 
+                 \\ 
+      F^3 \cfbot &= F F^2 \cfbot \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   F^2 \cfbot [\sigma\ |\ \x : 0] &\text{ si }\sigma \x < 0 \\ 
+                   F^2 \cfbot [\sigma\ |\ \x : \sigma \x + 1] &\text{ si }0 \leq \sigma x < 2 \\ 
+                   \sigma &\text{ si }2 \leq \sigma \x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma \x < 0 \land 0 \leq 0 \\ 
+                   [\sigma\ |\ \x : 0\ |\ \x : \max(2, 0)] &\text{ si }1 \leq 0 \\ 
+                   \bot &\text{ si } 0 \leq \sigma \x < 2 \land \sigma \x + 1 \leq 0 \\ 
+                   [\sigma\ |\ \x : \sigma \x + 1\ |\ \x : \max(2, \sigma \x + 1)] &\text{ si }0 \leq \sigma \x < 2 \land 1 \leq \sigma \x + 1 \\ 
+                   \sigma &\text{ si }2 \leq \sigma \x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma \x < 0 \\ 
+                   [\sigma\ |\ \x : \max(2, \sigma \x + 1)] &\text{ si }0 \leq \sigma \x < 2 \\ 
+                   \sigma &\text{ si }2 \leq \sigma \x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si } \sigma \x < 0 \\ 
+                   [\sigma\ |\ \x : \max(2, \sigma \x)] &\text{ si }0 \leq \sigma \x
+                 \end{cases} \\ 
+                 \\ 
+      F^4 \cfbot &= \sigma \mapsto \begin{cases}
+        F^3 \cfbot [\sigma\ |\ \x : 0]&\text{ si }\sigma \x < 0 \\ 
+        F^3 \cfbot [\sigma\ |\ \x:\sigma\x+1]&\text{ si }0\leq\sigma\x<2 \\ 
+        \sigma&\text{ si }2\leq\sigma\x
+      \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot&\text{ si }\sigma\x<0 \land 0<0 \\ 
+                   [\sigma\ |\ \x : 0\ |\ \x : \max(2, \sigma\x)] &\text{ si } \sigma\x < 0 \land 0 \leq 0 \\ 
+                   \bot &\text{ si }0 \leq \sigma\x < 2 \land \sigma\x+1 < 0 \\ 
+                   [\sigma\ |\ \x : \sigma\x+1\ |\ \x : \max(2,\sigma\x+1)] &\text{ si }0 \leq \sigma\x < 2 \land 0 \leq \sigma\x+1 \\ 
+                   \sigma &\text{ si }2 \leq \sigma\x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   [\sigma\ |\ \x : \max(2, \sigma \x)] &\text{ si }\sigma \x < 0 \\ 
+                   [\sigma\ |\ \x : \max(2, \sigma\x+1)] &\text{ si }0 \leq \sigma\x < 2 \\ 
+                   \sigma &\text{ si }2 \leq \sigma\x 
+                 \end{cases} \\ 
+                 &= \sigma \mapsto [\sigma\ |\ \x : \max(2, \sigma\x)]
+  \end{aligned}
+\end{equation*}
+
+Como en este último llegamos a una definición total para $F^4 \cfbot$, significa que el while realiza un máximo de $3$ iteraciones.
+Al ser una cadena y cumplirse que $F^0 \cfbot \fleq F^1 \cfbot \fleq F^2 \cfbot \fleq \dots$, como $F^4 \cfbot$ está definido en todos los valores (i.e., no tiene bottom en la imagen), entonces este es el supremo de la cadena.
+Motivo de ello, entonces, tenemos que:
+\begin{equation*}
+  \supr_{i \in \N} F^i \cfbot = F^4 \cfbot = \sigma \mapsto [\sigma\ |\ \x : \max(2, \sigma\x)]
+\end{equation*}
+
+\subsection*{Item B}
+Se considera el comando $\cwhile{\x < 2}{\cif{\y = 0}{\x := \x + 1}{\cskip}}$.
+Sea $w \in \cfbot$ la función semántica para el while, notemos que:
+\begin{equation*}
+  \begin{aligned}
+    w \sigma &= \begin{cases}
+      w_{\bbot} (\sem{\cif{\y = 0}{\x := \x + 1}{\cskip}} \sigma) &\text{ si }\sem{\x < 2}\sigma \\ 
+      \sigma &\text{ si }\neg\sem{\x < 2}\sigma
+    \end{cases} \\ 
+             &= \begin{cases}
+               w_{\bbot} (\sem{\x := \x + 1} \sigma) & \text{ si } \sem{\x < 2}\sigma \land \sem{\y = 0}\sigma \\ 
+               w_{\bbot} (\sem{\cskip} \sigma) &\text{ si }\sem{\x < 2}\sigma \land \neg\sem{\y = 0}\sigma \\ 
+               \sigma &\text{ si } \neg\sem{\x < 2}\sigma
+             \end{cases} \\ 
+             &= \begin{cases}
+               w [\sigma\ |\ \x : \sigma\x+1] &\text{ si } \sigma\x < 2 \land \sigma\y = 0 \\ 
+               w \sigma &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0 \\ 
+               \sigma &\text{ si } 2 \leq \sigma\x
+             \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Sea $F \in (\cdom) \to (\cdom)$, consideramos:
+\begin{equation*}
+  F w \sigma = \begin{cases}
+    w [\sigma\ |\ \x : \sigma\x+1] &\text{ si }\sigma\x < 2 \land \sigma\y = 0 \\ 
+    w \sigma &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \\ 
+    \sigma &\text{ si } 2 \leq \sigma\x
+  \end{cases}
+\end{equation*}
+
+Con ello en mente, como $F$ es continua al ser la semántica de un while, podemos aplicar directamente el TMPF.
+Veamos algunos casos para $F^i \cfbot$:
+\begin{equation*}
+  \begin{aligned}
+    F^0 \cfbot &= \cfbot \\ 
+    \\ 
+    F^1 \cfbot &= \sigma \mapsto \begin{cases}
+      \cfbot [\sigma\ |\ \x : \sigma\x + 1] &\text{ si } \sigma\x < 2 \land \sigma\y = 0 \\ 
+      \cfbot \sigma &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \\ 
+      \sigma &\text{ si }2 \leq \sigma\x
+    \end{cases} \\ 
+               &= \sigma \mapsto \begin{cases}
+                 \bot &\text{ si } \sigma\x < 2 \\ 
+                 \sigma &\text{ si } 2 \leq \sigma\x
+               \end{cases} \\ 
+               \\ 
+      F^2 \cfbot &= \sigma \mapsto \begin{cases}
+        F \cfbot [\sigma\ |\ \x : \sigma\x+1] &\text{ si }\sigma\x < 2 \land \sigma\y = 0 \\ 
+        F \cfbot \sigma &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \\ 
+        \sigma &\text{ si }2 \leq \sigma\x
+      \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma\x < 2 \land \sigma\y = 0 \land \sigma\x+1 < 2 \\ 
+                   [\sigma\ |\ \x : \sigma\x+1] &\text{ si }\sigma\x < 2 \land \sigma\y = 0 \land 2 \leq \sigma\x+1 \\ 
+                   \bot &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \land \sigma\x < 2 \\ 
+                   \sigma &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \land 2 \leq \sigma\x \\ 
+                   \sigma &\text{ si } 2 \leq \sigma\x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma\x < 1 \land \sigma\y = 0 \\ 
+                   [\sigma\ |\ \x : \sigma\x+1] &\text{ si }\sigma\x = 1 \land \sigma\y = 0 \\ 
+                   \bot &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \\ 
+                   \sigma &\text{ si } 2 \leq \sigma\x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \sigma &\text{ si } 2 \leq \sigma\x \\ 
+                   [\sigma\ |\ \x : 2] &\text{ si } \sigma\x = 1 \land \sigma\y = 0 \\ 
+                   \bot &\text{ si } \sigma\x < 1 \land \sigma\y = 0 \\
+                   \bot &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0
+                 \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Viendo esto, como sabemos que $F^0 \cfbot \fleq F^1 \cfbot \fleq \dots$ y buscamos el supremo $\supr_{i \in \N} F^i \cfbot$, entonces es claro que este mismo es igual a $\supr_{i = 1}^\infty F^i \cfbot$.
+Esto se menciona porque se propone la siguiente caracterización de $F^i \cfbot$ para $i \in \N_{\geq 1}$:
+\begin{equation*}
+  F^i \cfbot = \sigma \mapsto \begin{cases}
+    \sigma &\text{ si } 2 \leq \sigma\x \\ 
+    [\sigma\ |\ \x : 2] &\text{ si } 3-i \leq \sigma\x < 2 \land \sigma\y = 0 \\ 
+    \bot &\text{ si } \sigma\x < 3-i \land \sigma\y = 0 \\ 
+    \bot &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0 
+  \end{cases}
+\end{equation*}
+
+Demostremos por inducción que esta caracterización es correcta.
+Para el caso base $n = 1$ tenemos que, por lo visto antes, este es igual a:
+\begin{equation*}
+  F^1 \cfbot = \sigma \mapsto \begin{cases}
+    \sigma &\text{ si } 2 \leq \sigma\x \\ 
+    \bot &\text{ si } \sigma\x < 2
+  \end{cases}
+\end{equation*}
+mientras que para la caracterización tenemos:
+\begin{equation*}
+  \begin{aligned}
+    F^1 \cfbot &= \sigma \mapsto \begin{cases}
+      \sigma &\text{ si } 2 \leq \sigma\x \\ 
+      [\sigma\ |\ \x : 2] &\text{ si } 3-1 \leq \sigma\x < 2 \land \sigma\y = 0 \\ 
+      \bot &\text{ si } \sigma\x < 3-1 \land \sigma\y \\ 
+      \bot &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0 
+    \end{cases} \\ 
+               &= \sigma \mapsto \begin{cases}
+                 \sigma &\text{ si } 2 \leq \sigma\x \\ 
+                 \bot &\text{ si } \sigma\x < 2 
+               \end{cases}
+  \end{aligned}
+\end{equation*}
+por lo que, entonces, se demuestra que se cumple para el caso base.
+
+Ahora, si suponemos como HI que se cumple para $k \in \N_{\geq 1}$, veamos qué sucede con $k+1$:
+\begin{equation*}
+  \begin{aligned}
+  F^{k+1} \cfbot &= \sigma \mapsto \begin{cases}
+    F^k \cfbot [\sigma\ |\ \x : \sigma\x+1] &\text{ si } \sigma\x < 2 \land \sigma\y = 0 \\ 
+    F^k \cfbot \sigma &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0 \\ 
+    \sigma &\text{ si } 2 \leq \sigma\x 
+  \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   [\sigma\ |\ \x : \sigma\x+1] &\text{ si } \sigma\x < 2 \land \sigma\y = 0 \land 2 \leq \sigma\x+1 \\ 
+                   [\sigma\ |\ \x : \sigma\x+1\ |\ \x : 2] &\text{ si }\sigma\x < 2 \land \sigma\y = 0 \land 3-k \leq \sigma\x+1 < 2 \land \sigma\y = 0 \\ 
+                   \bot &\text{ si }\sigma\x < 2 \land \sigma\y = 0 \land \sigma\x+1 < 3-k \land \sigma\y = 0 \\ 
+                   \bot &\text{ si }\sigma\x < 2 \land \sigma\y = 0 \land \sigma\x+1 < 2 \land \sigma\y \neq 0 \\ 
+                   \sigma &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \land 2 \leq \sigma\x \\ 
+                   [\sigma\ |\ \x : 2] &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0 \land 3-k \leq \sigma\x < 2 \land \sigma\y = 0 \\ 
+                   \bot &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \land \sigma\x < 3-k \land \sigma\y = 0 \\ 
+                   \bot &\text{ si }\sigma\x < 2 \land \sigma\y \neq 0 \land \sigma\x < 2 \land \sigma\y \neq 0 \\ 
+                   \sigma &\text{ si } 2 \leq \sigma\x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   [\sigma\ |\ \x : 2] &\text{ si } \sigma\x = 1 \land \sigma\y = 0 \\ 
+                   [\sigma\ |\ \x : 2] &\text{ si } 3-(k+1) \leq \sigma\x < 1 \land \sigma\y = 0 \\ 
+                   \bot &\text{ si } \sigma\x < 3-(k+1) \land \sigma\y = 0 \\ 
+                   \bot &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0 \\ 
+                   \sigma &\text{ si } 2 \leq \sigma\x
+                 \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \sigma &\text{ si } 2 \leq \sigma\x \\ 
+                   [\sigma\ |\ \x : 2] &\text{ si } 3-(k+1) \leq \sigma\x < 2 \land \sigma\y = 0 \\ 
+                   \bot &\text{ si } \sigma\x < 3-(k+1) \land \sigma\y = 0 \\ 
+                   \bot &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0
+                 \end{cases}
+  \end{aligned}
+\end{equation*}
+por lo que se demuestra el paso inductivo y, con ello, la caracterización propuesta. $\qed$
+
+Sabiendo que esta caracterización es correcta, es sencillo ahora notar que por TMPF la semántica del while está dada por:
+\begin{equation*}
+  \supr_{i \in \N} F^i \cfbot = \supr_{i = 1}^\infty F^i \cfbot = \sigma \mapsto \begin{cases}
+    \sigma &\text{ si } 2 \leq \sigma\x \\ 
+    [\sigma\ |\ \x : 2] &\text{ si } \sigma\x < 2 \land \sigma\y = 0 \\ 
+    \bot &\text{ si } \sigma\x < 2 \land \sigma\y \neq 0
+  \end{cases}
+\end{equation*}
+
+\section*{Ejercicio 6}
+Para este ejercicio, vamos a suponer que $\sem{\cwhile{b}{c}}\sigma \neq \bot$.
+
+\subsection*{Item A}
+Queremos demostrar que $\exists n \geq 0 : F^n \cfbot \sigma \neq \bot$.
+Para ello, lo vamos a demostrar por el absurdo.
+Digamos que no se cumple esta propiedad, es decir, $\forall n \geq 0 : F^n \cfbot \sigma = \bot$.
+Como $F$ es continua al ser la semántica de un while, por el TMPF tenemos que $\sem{\cwhile{b}{c}} = \supr_{i \in \N} F^i \cfbot$.
+Teniendo esto en cuenta, veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cwhile{b}{c}} \sigma &= \left(\supr_{i \in \N} F^i \cfbot\right) \sigma \\ 
+                               &= \supr_{i \in \N} (F^i \cfbot \sigma) \\ 
+                               &= \supr_{i \in \N} \bot \\ 
+                               &= \bot 
+  \end{aligned}
+\end{equation*}
+por lo que se llega a un absurdo que vino de suponer que no se cumple la propiedad.
+
+Luego, finalmente, se demuestra que $\exists n \geq 0 : F^n \cfbot \sigma \neq \bot$. $\qed$
+
+\subsection*{Item B}
+Queremos demostrar que $\sigma' = \sem{\cwhile{b}{c}}\sigma \Rightarrow \neg\sem{b}\sigma'$.
+Para ello, primero supongamos que vale $\sigma' = \sem{\cwhile{b}{c}}\sigma$.
+Por TMPF tenemos que $\sigma' = \sem{\cwhile{b}{c}}\sigma = \left(\supr_{i \in \N} F^i \cfbot\right)\sigma$.
+Ahora, esto significa también que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cwhile{b}{c}} \sigma' &= \left(\supr_{i \in \N} F^i \cfbot\right) \sigma' \\ 
+                                &= \supr_{i \in \N} (F^i \cfbot \sigma') \\ 
+                                &= \supr_{i \in \N} \left(F^i \cfbot \left(\supr_{j \in \N} F^j \cfbot\right) \sigma\right) \\ 
+                                &= \supr_{i \in \N} \left(F^i \cfbot \left(\supr_{j \in \N} F^j \cfbot \sigma\right)\right) \\ 
+                                &= \supr_{i \in \N} \left(\supr_{j \in \N} F^{i + j} \cfbot \sigma\right) \\ 
+                                &= \supr_{k \in \N} F^k \cfbot \sigma \\ 
+                                &= \sigma'
+  \end{aligned}
+\end{equation*}
+
+Ahora, tenemos que $\sigma' = \sem{\cwhile{b}{c}} \sigma' = \supr_{i \in \N} F^i \cfbot \sigma'$ y que:
+\begin{equation*}
+  F \sem{\cwhile{b}{c}} \sigma' = \begin{cases}
+    \sem{\cwhile{b}{c}}_{\bbot} (\sem{c}\sigma') &\text{ si } \sem{b}\sigma' \\ 
+    \sigma' &\text{ si } \neg\sem{b}\sigma'
+  \end{cases}
+\end{equation*}
+
+Como $F \sem{\cwhile{b}{c}} \sigma' = F \left(\supr_{i \in \N} F^i \cfbot\right) \sigma' = \left(\supr_{i \in \N_{\geq 1}} F^i \cfbot\right) \sigma' = \left(\supr_{i \in \N} F^i \cfbot\right) \sigma' = \sigma'$, resulta que por la definición anterior para $F$ entonces se cumple $\neg\sem{b}\sigma'$.
+
+Luego, con ello, se demuestra la implicación propuesta. $\qed$
+
+\section*{Ejercicio 7}
+Queremos demostrar o refutar las siguientes equivalencias usando semántica denotacional.
+Veamos cada una de estas por separado.
+
+\subsection*{Item A}
+Se pretender analizar la equivalencia $\cwhile{\cfalse}{c} \equiv \cskip$.
+Claramente estas son equivalentes por lo que nos vamos a concentrar en demostrar este hecho.
+
+Veamos primero que, sea $w = \sem{\cwhile{\cfalse}{c}}$, entonces:
+\begin{equation*}
+  \begin{aligned}
+    w \sigma &= \begin{cases}
+      w_{\bbot} (\sem{c}\sigma) &\text{ si } \sem{\cfalse}\sigma \\ 
+      \sigma &\text{ si }\neg\sem{\cfalse}\sigma 
+    \end{cases} \\ 
+             &= \sigma
+  \end{aligned}
+\end{equation*}
+
+Mientras que del otro lado tenemos que:
+\begin{equation*}
+  \sem{\cskip} \sigma = \sigma
+\end{equation*}
+
+Motivo de ello, como $\forall \sigma \in \Sigma$ se cumple que $\sem{\cwhile{\cfalse}{c}}\sigma = \sigma = \sem{\cskip}\sigma$, se demuestra la equivalencia propuesta. $\qed$
+
+\subsection*{Item B}
+Se pretende analizar la equivalencia $\cwhile{b}{c} \equiv \cwhile{b}{(c;c)}$.
+Claramente estas no son equivalentes y lo vamos a mostrar con un contraejemplo.
+Sea $\cwhile{\x = 0}{\x := \x + 1} \equiv \cwhile{\x = 0}{(\x := \x + 1; \x := \x + 1)}$ la equivalencia para refutarla, $w_1$ y $w_2$ las semánticas de los dos whiles respectivamente, notemos que:
+\begin{equation*}
+  \begin{aligned}
+    w_1 \sigma &= \begin{cases}
+    {w_1}_{\bbot} (\sem{\x := \x + 1}\sigma) &\text{ si }\sem{\x = 0}\sigma \\ 
+      \sigma &\text{ si }\neg\sem{\x = 0}\sigma 
+    \end{cases} \\ 
+             &= \begin{cases}
+               w_1 [\sigma\ |\ \x : \sigma\x+1] &\text{ si } \sigma\x = 0 \\ 
+               \sigma &\text{ si } \sigma\x \neq 0
+             \end{cases} \\ 
+             &= \begin{cases}
+               w_1 [\sigma\ |\ \x : 1] &\text{ si }\sigma\x = 0 \\ 
+               \sigma &\text{ si } \sigma\x \neq 0 
+             \end{cases}
+             \\ 
+    w_2 \sigma &= \begin{cases}
+      {w_2}_{\bbot} (\sem{\x := \x+1; \x := \x+1}\sigma) &\text{ si }\sem{\x = 0}\sigma \\ 
+      \sigma &\text{ si }\neg\sem{\x = 0}\sigma 
+    \end{cases} \\ 
+               &= \begin{cases}
+                 w_2 [\sigma\ |\ \x : \x+2] &\text{ si } \sigma\x = 0 \\ 
+                 \sigma &\text{ si } \sigma\x \neq 0 
+               \end{cases} \\ 
+               &= \begin{cases}
+                 w_2 [\sigma\ |\ \x : 2] &\text{ si }\sigma\x = 0 \\ 
+                 \sigma &\text{ si } \sigma\x \neq 0
+               \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Con esto en mente, entonces supongamos $F_1, F_2 \in (\cdom) \to (\cdom)$ tales que:
+\begin{equation*}
+  \begin{aligned}
+    F w_1 \sigma &= \begin{cases}
+      w_1 [\sigma\ |\ \x : 1] &\text{ si } \sigma\x = 0 \\ 
+      \sigma &\text{ si }\sigma\x \neq 0
+    \end{cases} \\ 
+    \\ 
+      F w_2 \sigma &= \begin{cases}
+        w_2 [\sigma\ |\ \x : 2] &\text{ si }\sigma\x = 0 \\ 
+        \sigma &\text{ si }\sigma\x \neq 0
+      \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Ahora, al ser estas semánticas del while, veamos algunos $F^i \cfbot$ para calcularlas gracias al TMPF:
+\begin{equation*}
+  \begin{aligned}
+    F_1^0 \cfbot &= \cfbot \\ 
+    \\ 
+    F_1^1 \cfbot &= \sigma \mapsto \begin{cases}
+      \cfbot [\sigma\ |\ \x : 1] &\text{ si }\sigma\x = 0 \\ 
+      \sigma &\text{ si }\sigma\x \neq 0
+    \end{cases} \\ 
+                 &= \sigma \mapsto \begin{cases}
+                   \bot &\text{ si }\sigma\x = 0 \\ 
+                   \sigma &\text{ si }\sigma\x \neq 0
+                 \end{cases}
+    \\ 
+      F_1^2 \cfbot &= \sigma \mapsto \begin{cases}
+        F_1 [\sigma\ |\ \x : 1] &\text{ si }\sigma\x = 0 \\ 
+        \sigma &\text{ si }\sigma\x \neq 0 
+      \end{cases} \\ 
+                   &= \sigma \mapsto \begin{cases}
+                     \bot &\text{ si }\sigma\x = 0 \land 1 = 0 \\ 
+                     [\sigma\ |\ \x : 1] &\text{ si }\sigma\x = 0 \land 1 \neq 0 \\ 
+                     \sigma &\text{ si }\sigma\x \neq 0
+                   \end{cases} \\ 
+                   &= \sigma \mapsto \begin{cases}
+                     [\sigma\ |\ \x : 1] &\text{ si } \sigma\x = 0 \\ 
+                     \sigma &\text{ si }\sigma\x \neq 0
+                   \end{cases}
+  \end{aligned}
+\end{equation*}
+y, de forma totalmente análoga, podemos llegar a que:
+\begin{equation*}
+  \begin{aligned}
+    F_2^2 \cfbot &= \sigma \mapsto \begin{cases}
+      [\sigma\ |\ \x : 2] &\text{ si }\sigma\x = 0 \\ 
+      \sigma &\text{ si }\sigma\x \neq 0
+    \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Ahora, dado que tenemos las cadenas $F_1^0 \cfbot \fleq F_1^1 \cfbot \fleq \dots$ y $F_2^0 \cfbot \fleq F_2^1 \cfbot \fleq \dots$ y tanto $F_1^2$ como $F_2^2$ no tienen a bottom en la imagen, entonces ambos son el supremo de sus cadenas:
+\begin{equation*}
+  \begin{aligned}
+    \supr_{i \in \N} F_1^i \cfbot &= \sigma \mapsto \begin{cases}
+      [\sigma\ |\ \x : 1] &\text{ si }\sigma\x = 0 \\ 
+      \sigma &\text{ si }\sigma\x \neq 0 
+    \end{cases} \\ 
+    \\ 
+    \supr_{i \in \N} F_2^i \cfbot &= \sigma \mapsto \begin{cases}
+      [\sigma\ |\ \x : 2] &\text{ si }\sigma\x = 0 \\ 
+      \sigma &\text{ si }\sigma\x \neq 0 
+    \end{cases} \\ 
+  \end{aligned}
+\end{equation*}
+
+Finalmente, entonces, esto muestra que sus semánticas son distintas por lo que no se cumple la equivalencia al mostrar un contraejemplo de ello.
+
+\subsection*{Item C}
+Queremos analizar la equivalencia dada por $(\cwhile{b}{c}); \cif{b}{c_0}{c_1} \equiv (\cwhile{b}{c}); c_1$.
+Claramente son equivalentes por lo que nos concentraremos en demostrarlo.
+Para ello, sea $w = \sem{\cwhile{b}{c}}$, las semánticas son
+\begin{equation*}
+  \begin{aligned}
+    \sem{(\cwhile{b}{c});\cif{b}{c_0}{c_1}} \sigma &= \sem{\cif{b}{c_0}{c_1}}_{\bbot} (w \sigma) \\ 
+                                                   &= \begin{cases}
+                                                     \bot &\text{ si } w\sigma = \bot \\ 
+                                                     \sem{c_0} (w \sigma) &\text{ si } w\sigma \neq \bot \land \sem{b}(w\sigma) \\ 
+                                                     \sem{c_1} (w \sigma) &\text{ si }w\sigma \neq \bot \land \neg\sem{b}(w\sigma)
+                                                   \end{cases} \\ 
+                                                   \\ 
+    \sem{(\cwhile{b}{c});c_1} \sigma &= \sem{c_1}_{\bbot} (w\sigma) \\ 
+                                     &= \begin{cases}
+                                       \bot &\text{ si }w\sigma = \bot \\ 
+                                       \sem{c_1}(w\sigma) &\text{ si }w\sigma \neq \bot
+                                     \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Por el ejercicio $(6b)$ sabemos que $\sigma' = w\sigma \Rightarrow \neg\sem{b}\sigma'$.
+Por ello, entonces en la semántica del primer comando no se considera el 2do caso y, finalmente, las semánticas de ambos comandos son iguales.
+Con ello, se demuestra la equivalencia para $\sigma \in \Sigma$. $\qed$
+
+\section*{Ejercicio 8}
+En este ejercicio se pretende analizar las siguientes propuestas de definiciones como syntactic sugar de $\cfor{v}{e_0}{e_1}{c}$.
+Estas son:
+\begin{itemize}
+  \item $v := e_0; \cwhile{v \leq e_1}{c}; v := v + 1$
+  \item $\cnewvar{v}{e_0}{\cwhile{v \leq e_1}{c}; v := v + 1}$
+  \item $\cnewvar{w}{e_1}{\cnewvar{v}{e_0}{\cwhile{v \leq w}{c; v := v + 1}}}$
+\end{itemize}
+
+Dado que se considera en este for un rango específico $[e_0, e_1]$, donde ambas son expresiones enteras, entonces la mejor opción sería la 3er definición debido a que antes de iniciar con la iteración, fija los valores de los extremos donde esta se va a realizar (mediante el uso de variables locales).
+
+\section*{Siguientes ejercicios}
+No se continúa con los siguientes ejercicios de la presente guía.
+Si poseo más tiempo para realizarlos, los haré.
+Independientemente de ello, algunas menciones importantes son:
+\begin{itemize}
+  \item \textit{Ejercicio 9}: El caso \textbf{while} del TC se encuentra demostrado en archivos del aula virtual.
+                 Por ejemplo, en \href{https://famaf-consultas.aulavirtual.unc.edu.ar/pluginfile.php/123179/mod_folder/content/0/TCwhile.pdf?forcedownload=1}{este} del aula virtual 2021 en FAMAF consultas.
+  \item \textit{Ejercicio 10}: La solución a este ejercicio puede encontrarse en un \href{https://famaf-consultas.aulavirtual.unc.edu.ar/pluginfile.php/61374/mod_resource/content/2/P4E10.pdf}{archivo} en el aula virtual 2020 en FAMAF consultas.
+\end{itemize}
+
+\end{document}
