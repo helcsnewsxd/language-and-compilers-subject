@@ -1,0 +1,267 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+
+\geometry{
+  a4paper,
+  total = {170mm, 257mm},
+  left = 20mm,
+  top = 20mm,
+}
+\graphicspath{ {./images/} }
+
+\newcommand{\addfig}[2]{\begin{figure}[!htb] \centering \includegraphics[width=#1\textwidth]{#2}\end{figure}}
+
+\newcommand{\aexp}[1]{\langle\text{#1}\rangle}
+\newcommand{\intexp}{\aexp{intexp}}
+\newcommand{\var}{\aexp{var}}
+\newcommand{\assert}{\aexp{assert}}
+\newcommand{\boolexp}{\aexp{boolexp}}
+\newcommand{\comm}{\aexp{comm}}
+\newcommand{\sem}[1]{\left\llbracket #1\right\rrbracket}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\B}{\mathbb{B}}
+
+\newcommand{\x}{\textbf{x}}
+\newcommand{\y}{\textbf{y}}
+\newcommand{\z}{\textbf{z}}
+
+\newcommand{\supr}{\bigsqcup\limits}
+
+\newcommand{\fleq}{\sqsubseteq}
+\newcommand{\cdom}{\Sigma \to \Sigma_\bot}
+\newcommand{\cdomf}{\Sigma \to \Sigma_\bot'}
+\newcommand{\cfbot}{\bot_{\cdom}}
+\newcommand{\bbot}{\bot\!\!\!\bot}
+\newcommand{\ctrue}{\textbf{true}}
+\newcommand{\cfalse}{\textbf{false}}
+\newcommand{\cskip}{\textbf{skip}}
+\newcommand{\cif}[3]{\textbf{if }#1\textbf{ then }#2\textbf{ else }#3}
+\newcommand{\cnewvar}[3]{\textbf{newvar }#1 := #2\textbf{ in }#3}
+\newcommand{\cwhile}[2]{\textbf{while }#1\textbf{ do }#2}
+\newcommand{\cfor}[4]{\textbf{for }#1 := #2\text{ to }#3\text{ do }#4}
+\newcommand{\cfail}{\textbf{fail}}
+\newcommand{\ccatch}[2]{\textbf{catchin }#1\textbf{ with }#2}
+\newcommand{\cabort}[1]{\langle\textbf{abort}, #1\rangle}
+
+\title{Trabajo práctico N° 5}
+\author{Emanuel Nicolás Herrador}
+\date{Mayo 2025}
+
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 1em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+\noindent\begin{tabular}{@{}ll}
+	Estudiante & \theauthor \\
+\end{tabular}
+
+\section*{Ejercicio 1}
+Dado $P \equiv \cnewvar{\x}{\y+\x}{(\cwhile{\x>0}{(\cif{\x>0}{\cskip}{\cfail})})}$, se pretende caracterizar (sin usar la semántica) los estados $\sigma$ en los cuales $P$ se comporta como $\cskip$.
+Es decir, se pretender ver cuáles son aquellos estados en los cuales se termina la ejecución de este comando sin abortar y sin cambiar los valores del estado.
+
+Es sencillo notar que como en ningún comando se cambia el valor de alguna variable de forma global (es decir, sin contar la definición local con \textbf{newvar}), entonces solo nos interesa diferenciar los casos donde la ejecución termina o no, y si esta termina con falla o no.
+El otro punto a notar es que como la guarda del while es $\x > 0$ y la del if dentro de este es la misma, entonces este último resulta irrelevante.
+Es decir, el while en realidad es equivalente a $\cwhile{\x > 0}{\cskip}$.
+Luego, los únicos casos donde la ejecución termina y sin fallas es cuando no entra dentro del while, es decir, cuando $\x \leq 0$.
+Ahora, como la definición local es $\x := \x+\y$, entonces la respuesta son aquellos estados $\sigma \in \Sigma : \sigma\x + \sigma\y \leq 0$.
+
+\section*{Ejercicio 2}
+Se pretende ahora analizar las siguientes equivalencias usando la semántica denotacional de LIS con fallas.
+Veamos cada uno de los casos de forma separada.
+
+\subsection*{Item A}
+Queremos analizar la equivalencia dada por $c; \cwhile{\ctrue}{\cskip} \equiv \cwhile{\ctrue}{\cskip}$.
+No son equivalentes y esto lo vamos a mostrar con un contraejemplo.
+Sea $c \equiv \cfail$, queremos analizar ahora
+\begin{equation*}
+  \cfail; \cwhile{\ctrue}{\cskip} \equiv \cwhile{\ctrue}{\cskip}
+\end{equation*}
+
+Veamos que para el lado izquierdo:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cfail; \cwhile{\ctrue}{\cskip}} \sigma &= \sem{\cwhile{\ctrue}{\cskip}}_* (\sem{\cfail}\sigma) \\ 
+                                                 &= \sem{\cwhile{\ctrue}{\cskip}}_* \cabort{\sigma} \\ 
+                                                 &= \cabort{\sigma}
+  \end{aligned}
+\end{equation*}
+
+Mientras que para el lado derecho tenemos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cwhile{\ctrue}{\cskip}} \sigma &= \begin{cases}
+      \sem{\cwhile{\ctrue}{\cskip}}_* (\sem{\cskip}\sigma) &\text{ si }\sem{\ctrue}\sigma \\ 
+      \sigma &\text{ si }\neg\sem{\ctrue}
+    \end{cases} \\ 
+                                         &= \sem{\cwhile{\ctrue}{\cskip}} \sigma
+  \end{aligned}
+\end{equation*}
+por lo que para $F \in (\cdomf) \to (\cdomf)$ tenemos que $F w \sigma = w \sigma$ y la semántica del while por TMPF es $w = \supr_{i \in \N} F^i \cfbot$.
+Claramente, entonces, $\sem{\cwhile{\ctrue}{\cskip}} = \cfbot$ por lo que se refuta la equivalencia al mostrar este contraejemplo.
+
+\subsection*{Item B}
+Queremos analizar la equivalencia dada por $c; \cfail \equiv \cfail$.
+Claramente, si bien en ambos casos se llega a una falla, no necesariamente se llega al mismo estado por lo que no es cierta.
+Motivo de esto, se va a dar un contraejemplo.
+Sea $c \equiv \x := \x+1$, se pretende ver $\x := \x+1; \cfail \equiv \cfail$.
+Veamos primero el lado izquierdo:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\x := \x+1; \cfail} \sigma &= \sem{\cfail}_* (\sem{\x := \x+1}\sigma) \\ 
+                                    &= \sem{\cfail} [\sigma\ |\ \x : \sigma\x+1] \\ 
+                                    &= \cabort{[\sigma\ |\ \x : \sigma\x+1]}
+  \end{aligned}
+\end{equation*}
+
+Mientras que para el lado derecho tenemos $\sem{\cfail}\sigma = \cabort{\sigma}$.
+Luego, entonces es claro que no se cumple la equivalencia gracias a este contraejemplo mostrado.
+
+\subsection*{Item C}
+Queremos analizar la equivalencia $\cnewvar{v}{e}{v := v+1}; \cfail \equiv \cnewvar{w}{e}{w := w+1}; \cfail$.
+Estas dos son equivalentes, por lo que me concentraré en demostrarlo aquí.
+Notar que ambas semánticas son similares, por lo que solo me concentraré en calcularlo para el lazo izquierdo:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cnewvar{v}{e}{v := v+1}; \cfail}\sigma &= (\lambda \sigma' \in \Sigma.\ [\sigma'\ |\ v : \sigma v])_\dagger (\sem{v := v+1; \cfail}[\sigma\ |\ v : \sem{e}\sigma]) \\ 
+                                                 &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ v : \sigma v])_\dagger (\sem{\cfail}_* (\sem{v := v+1}[\sigma\ |\ v : \sem{e}\sigma])) \\ 
+                                                 &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ v : \sigma v])_\dagger (\sem{\cfail} [\sigma\ |\ v : \sem{e}\sigma+1]) \\ 
+                                                 &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ v : \sigma v])_\dagger \cabort{[\sigma\ |\ v : \sem{e}\sigma+1]} \\ 
+                                                 &= \cabort{\sigma}
+  \end{aligned}
+\end{equation*}
+
+Como en el lado derecho también se llega, de forma similar, a $\cabort{\sigma}$, entonces se demuestra la equivalencia. $\qed$
+
+\subsection*{Item D}
+Queremos analizar la equivalencia dada por $\cwhile{b}{\cfail} \equiv \cif{b}{\cfail}{\cskip}$.
+Claramente son equivalentes, por lo que me centraré en demostrarlo.
+Primero, veamos el lado izquierdo:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cwhile{b}{\cfail}} \sigma &= \begin{cases}
+                                    \sem{\cwhile{b}{\cfail}}_* (\sem{\cfail}\sigma) &\text{ si }\sem{b}\sigma \\ 
+                                    \sigma &\text{ si }\neg\sem{b}\sigma
+                                  \end{cases} \\ 
+                                    &= \begin{cases}
+                                      \sem{\cwhile{b}{\cfail}}_* \cabort{\sigma} &\text{ si }\sem{b}\sigma \\ 
+                                      \sigma &\text{ si } \neg\sem{b}\sigma
+                                    \end{cases} \\ 
+                                    &= \begin{cases}
+                                      \cabort{\sigma} &\text{ si } \sem{b}\sigma \\ 
+                                      \sigma &\text{ si } \neg\sem{b}\sigma
+                                    \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Ahora, respecto al lado derecho tenemos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cif{b}{\cfail}{\cskip}}\sigma &= \begin{cases}
+                                        \sem{\cfail}\sigma &\text{ si }\sem{b}\sigma \\ 
+                                        \sem{\cskip}\sigma &\text{ si }\neg\sem{b}\sigma
+                                      \end{cases} \\ 
+                                        &= \begin{cases}
+                                          \cabort{\sigma} &\text{ si }\sem{b}\sigma \\ 
+                                          \sigma &\text{ si }\neg\sem{b}\sigma
+                                        \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Por ello, entonces, se demuestra la equivalencia entre ambos comandos debido a que presentan la misma semántica para todo estado. $\qed$
+
+\subsection*{Item E}
+Queremos analizar la equivalencia dada por:
+\begin{equation*}
+  \x := 0; \ccatch{(\cwhile{\x < 1}{\cfail})}{\x := 1} \equiv \x := 0; \cwhile{\x < 1}{(\ccatch{\cfail}{\x := 1})}
+\end{equation*}
+
+Claramente son equivalentes, por lo que me concentraré en demostrarlo.
+Sean $w_1 = \sem{\cwhile{\x<1}{\cfail}}$ y $w_2 = \sem{\cwhile{\x<1}{(\ccatch{\cfail}{\x := 1})}}$.
+Veamos primero el lado izquierdo:
+\begin{equation*}
+  \begin{aligned}
+    &\sem{\x := 0; \ccatch{(\cwhile{\x < 1}{\cfail})}{\x := 1}}\sigma \\ 
+    &= \sem{\ccatch{(\cwhile{\x < 1}{\cfail})}{\x := 1}}_* (\sem{\x := 0}\sigma) \\ 
+    &= \sem{\ccatch{(\cwhile{\x<1}{\cfail})}{\x := 1}} [\sigma\ |\ \x : 0] \\ 
+    &= \sem{\x := 1}_+ (w_1 [\sigma\ |\ \x : 0])
+  \end{aligned}
+\end{equation*}
+
+Notemos que:
+\begin{equation*}
+  \begin{aligned}
+    w_1 [\sigma\ |\ \x : 0] &= \begin{cases}
+                          {w_1}_* (\sem{\cfail}[\sigma\ |\ \x : 0]) &\text{ si }\sem{\x < 1}[\sigma\ |\ \x : 0] \\ 
+                          [\sigma\ |\ \x : 0] &\text{ si }\neg\sem{\x < 1}[\sigma\ |\ \x : 0]
+                        \end{cases} \\ 
+                    &= {w_1}_* \cabort{[\sigma\ |\ \x : 0]} \\ 
+                    &= \cabort{[\sigma\ |\ \x : 0]}
+  \end{aligned}
+\end{equation*}
+
+Entonces, si seguimos con el lado izquierdo:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\x := 1}_+ (w_1 [\sigma\ |\ \x : 0]) &= \sem{\x := 1}_+ \cabort{[\sigma\ |\ \x : 0]} \\ 
+                                      &= [\sigma\ |\ \x : 1]
+  \end{aligned}
+\end{equation*}
+
+Ahora, veamos el lado derecho:
+\begin{equation*}
+  \begin{aligned}
+    &\sem{\x := 0; \cwhile{\x<1}{(\ccatch{\cfail}{\x := 1})}}\sigma \\ 
+    &= {w_2}_* (\sem{\x := 0}\sigma) \\ 
+    &= {w_2} [\sigma\ |\ \x : 0] \\ 
+    &= \begin{cases}
+        {w_2}_* (\sem{\ccatch{\cfail}{\x := 1}}[\sigma\ |\ \x : 0]) &\text{ si } \sem{\x<1}[\sigma\ |\ \x : 0] \\ 
+        [\sigma\ |\ \x : 0] &\text{ si }\neg\sem{\x<1}[\sigma\ |\ \x : 0]
+      \end{cases} \\ 
+    &= {w_2}_* (\sem{\x := 1}_+ (\sem{\cfail}[\sigma\ |\ \x : 0])) \\ 
+    &= {w_2}_* (\sem{\x := 1}_+ \cabort{[\sigma\ |\ \x : 0]}) \\ 
+    &= {w_2}_* \sem{x := 1} [\sigma\ |\ \x : 0] \\ 
+    &= {w_2} [\sigma\ |\ \x : 1] \\ 
+    &= \begin{cases}
+        {w_2}_* (\sem{\ccatch{\cfail}{\x := 1}}[\sigma\ |\ \x : 1]) &\text{ si } \sem{\x<1}[\sigma\ |\ \x : 1] \\ 
+        [\sigma\ |\ \x : 1] &\text{ si }\neg\sem{\x<1}[\sigma\ |\ \x : 1]
+      \end{cases} \\ 
+    &= [\sigma\ |\ \x : 1]
+  \end{aligned}
+\end{equation*}
+
+Y, con esto, entonces se demuestra que la equivalencia es correcta. $\qed$
+
+\section*{Siguientes ejercicios}
+Los siguientes ejercicios propuestos en esta guía corresponden a semántica operacional que no es un tema que va al primer parcial.
+Motivo de ello, aún no los realizaré para concentrarme en los demás temas que sí entran.
+Luego los haré.
+
+\end{document}
