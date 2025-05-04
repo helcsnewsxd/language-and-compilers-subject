@@ -1,0 +1,279 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+
+\geometry{
+  a4paper,
+  total = {170mm, 257mm},
+  left = 20mm,
+  top = 20mm,
+}
+\graphicspath{ {./images/} }
+
+\newcommand{\addfig}[2]{\begin{figure}[!htb] \centering \includegraphics[width=#1\textwidth]{#2}\end{figure}}
+
+\newcommand{\aexp}[1]{\langle\text{#1}\rangle}
+\newcommand{\intexp}{\aexp{intexp}}
+\newcommand{\var}{\aexp{var}}
+\newcommand{\assert}{\aexp{assert}}
+\newcommand{\boolexp}{\aexp{boolexp}}
+\newcommand{\comm}{\aexp{comm}}
+\newcommand{\sem}[1]{\left\llbracket #1\right\rrbracket}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\B}{\mathbb{B}}
+
+\newcommand{\x}{\textbf{x}}
+\newcommand{\y}{\textbf{y}}
+\newcommand{\z}{\textbf{z}}
+
+\newcommand{\supr}{\bigsqcup\limits}
+
+\newcommand{\concat}{\texttt{ ++ }}
+
+\newcommand{\fleq}{\sqsubseteq}
+\newcommand{\cdom}{\Sigma \to \Sigma_\bot}
+\newcommand{\cdomf}{\Sigma \to \Sigma_\bot'}
+\newcommand{\cdomfo}{\Sigma \to \Omega}
+\newcommand{\cfbot}{\bot_{\cdom}}
+\newcommand{\cfbotf}{\bot_{\cdomf}}
+\newcommand{\cfbotfo}{\bot_{\cdomfo}}
+\newcommand{\bbot}{\bot\!\!\!\bot}
+\newcommand{\ctrue}{\textbf{true}}
+\newcommand{\cfalse}{\textbf{false}}
+\newcommand{\cskip}{\textbf{skip}}
+\newcommand{\cif}[3]{\textbf{if }#1\textbf{ then }#2\textbf{ else }#3}
+\newcommand{\cnewvar}[3]{\textbf{newvar }#1 := #2\textbf{ in }#3}
+\newcommand{\cwhile}[2]{\textbf{while }#1\textbf{ do }#2}
+\newcommand{\cfor}[4]{\textbf{for }#1 := #2\text{ to }#3\text{ do }#4}
+\newcommand{\cfail}{\textbf{fail}}
+\newcommand{\ccatch}[2]{\textbf{catchin }#1\textbf{ with }#2}
+\newcommand{\cabort}[1]{\langle\textbf{abort}, #1\rangle}
+\newcommand{\cout}[1]{\langle #1\rangle}
+
+\title{Trabajo práctico N° 6}
+\author{Emanuel Nicolás Herrador}
+\date{Mayo 2025}
+
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 1em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+\noindent\begin{tabular}{@{}ll}
+	Estudiante & \theauthor \\
+\end{tabular}
+
+\section*{Ejercicio 1}
+En este ejercicio se pretende dar un programa para cada posible comportamiento en LIS con fallas y output.
+Veamos cada caso posible de forma separada.
+
+Respecto a un programa con \textit{cantidad finita de output y luego divergencia}, podemos considerar:
+\begin{equation*}
+  \cwhile{\ctrue}{\cskip}
+\end{equation*}
+
+Un programa con \textit{cantidad finita de output y luego falla} puede ser:
+\begin{equation*}
+  \cfail 
+\end{equation*}
+
+Un programa con \textit{cantidad finita de output y luego terminación} puede ser:
+\begin{equation*}
+  \cskip
+\end{equation*}
+
+Y, finalmente, un programa con \textit{cantidad infinita de output} puede ser:
+\begin{equation*}
+  \cwhile{\ctrue}{!1}
+\end{equation*}
+
+\section*{Ejercicio 2}
+Dado el programa $\cwhile{\x>0}{!\x};c$ se pretende calcular la semántica denotacional para cada uno de los casos dependiendo el programa $c$.
+Se verá cada uno por separado.
+
+\subsection*{Item A}
+Consideramos $c \equiv \cif{\x>0}{\cskip}{\cfail}$.
+Luego, el programa a considerar es:
+\begin{equation*}
+  \cwhile{\x>0}{(!\x; \cif{\x>0}{\cskip}{\cfail})}
+\end{equation*}
+
+En base a eso, veamos la semántica del programa.
+Sea $w$ la semántica del while, entonces:
+\begin{equation*}
+  \begin{aligned}
+    &\sem{\cwhile{\x>0}{(!\x; \cif{\x>0}{\cskip}{\cfail})}} \sigma = \\ 
+    &= w\sigma \\ 
+    &= \begin{cases}
+      w_* (\sem{!\x; \cif{\x>0}{\cskip}{\cfail}}\sigma) &\text{ si }\sem{\x>0}\sigma \\ 
+      \cout{\sigma} &\text{ si }\neg\sem{\x>0}\sigma
+    \end{cases} \\ 
+    &= \begin{cases}
+      w_* (\sem{\cif{\x>0}{\cskip}{\cfail}}_* (\sem{!\x}\sigma)) &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      w_* (\sem{\cif{\x>0}{\cskip}{\cfail}} \cout{\sigma\x,\ \sigma}) &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \cout{\sigma\x,\ w_* (\sem{\cif{\x>0}{\cskip}{\cfail}} \sigma)} &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0 
+    \end{cases} \\ 
+    &= \begin{cases}
+      \cout{\sigma\x,\ w_* (\sem{\cskip} \sigma)} &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0 
+    \end{cases} \\ 
+    &= \begin{cases}
+      \cout{\sigma\x, w \sigma} &\text{ si } \sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0 
+    \end{cases} \\ 
+    &= \begin{cases}
+      \cout{\sigma\x} \concat w\sigma &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0
+    \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Ahora, para calcular $w$ vamos a considerar $F \in (\cdomfo) \to (\cdomfo)$ tal que:
+\begin{equation*}
+  F w \sigma = \begin{cases}
+    \cout{\sigma\x} \concat w\sigma &\text{ si }\sigma\x > 0 \\ 
+    \cout{\sigma} &\text{ si }\sigma\x \leq 0
+  \end{cases}
+\end{equation*}
+
+Sabemos que como $w$ es un while, entonces $F$ es una función continua.
+Ahora, para calcular la semántica del while podemos usar TMPF de modo que $w = \supr_{i \in \N} F^i \cfbotfo$.
+Para ello, entonces, se propone la siguiente caracterización para $F^i \cfbotfo$ con $i \geq 1$:
+\begin{equation*}
+  F^i \cfbotfo = \sigma \mapsto \begin{cases}
+    \cout{\overbrace{\sigma\x, \dots, \sigma\x}^{i \text{ veces}}} &\text{ si } \sigma\x > 0 \\ 
+    \cout{\sigma} &\text{ si } \sigma\x \leq 0
+  \end{cases}
+\end{equation*}
+
+Para demostrarlo, vamos a hacer inducción en $i$.
+Veamos primero el caso base $i = 1$:
+\begin{equation*}
+  \begin{aligned}
+    F^1 \cfbotfo &= \sigma \mapsto \begin{cases}
+                  \cout{\sigma\x} \concat \cfbotfo\sigma &\text{ si }\sigma\x > 0 \\ 
+                  \cout{\sigma} &\text{ si }\sigma\x \leq 0
+                \end{cases} \\
+                &= \sigma \mapsto \begin{cases}
+                  \cout{\sigma\x} &\text{ si }\sigma\x > 0 \\ 
+                  \cout{\sigma} &\text{ si }\sigma\x \leq 0
+                \end{cases}
+  \end{aligned}
+\end{equation*}
+por lo que se cumple.
+Ahora, como HI suponemos que la caracterización vale para $k \in \N_{\geq 1}$ y queremos ver $k+1$:
+\begin{equation*}
+  \begin{aligned}
+    F^{k+1} \cfbotfo &= \sigma \mapsto \begin{cases}
+                      \cout{\sigma\x} \concat F^k \cfbotfo \sigma &\text{ si }\sigma\x > 0 \\ 
+                      \cout{\sigma} &\text{ si }\sigma\x \leq 0
+                    \end{cases} \\ 
+                     &= \sigma \mapsto \begin{cases}
+                       \cout{\sigma\x} \concat \cout{\overbrace{\sigma\x, \dots, \sigma\x}^{k \text{ veces}}} &\text{ si } \sigma\x > 0 \\ 
+                       \cout{\sigma} &\text{ si }\sigma\x \leq 0
+                     \end{cases} \\ 
+                     &= \sigma \mapsto \begin{cases}
+                       \cout{\overbrace{\sigma\x, \dots, \sigma\x}^{k+1 \text{ veces}}} &\text{ si }\sigma\x > 0 \\ 
+                       \cout{\sigma} &\text{ si }\sigma\x \leq 0
+                     \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Luego, entonces, por TMPF queda claro que la semántica del while es:
+\begin{equation*}
+  w = \sigma \mapsto \begin{cases}
+    \cout{\overbrace{\sigma\x, \dots, \sigma\x, \dots}^\text{infinitas veces}} &\text{ si }\sigma\x > 0 \\ 
+    \cout{\sigma} &\text{ si }\sigma\x \leq 0
+  \end{cases}
+\end{equation*}
+
+\subsection*{Item B}
+Ahora consideramos $c \equiv \cif{\x>0}{\cfail}{\cskip}$.
+Por ello, el programa a considerar es:
+\begin{equation*}
+  \cwhile{\x>0}{(!x; \cif{\x>0}{\cfail}{\cskip})}
+\end{equation*}
+En base a eso, veamos la semántica del programa.
+Sea $w$ la semántica del while, entonces:
+\begin{equation*}
+  \begin{aligned}
+    &\sem{\cwhile{\x>0}{(!x; \cif{\x>0}{\cfail}{\cskip})}} \sigma = \\
+    &= w\sigma \\ 
+    &= \begin{cases}
+      w_* (\sem{!x; \cif{\x>0}{\cfail}{\cskip}}\sigma) &\text{ si }\sem{\x>0}\sigma \\ 
+      \cout{\sigma} &\text{ si }\neg\sem{\x>0}\sigma
+    \end{cases} \\ 
+    &= \begin{cases}
+      w_* (\sem{\cif{\x>0}{\cfail}{\cskip}}_* (\sem{!x}\sigma)) &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0 
+    \end{cases} \\ 
+    &= \begin{cases}
+      w_* (\sem{\cif{\x>0}{\cfail}{\cskip}}) \cout{\sigma\x, \sigma} &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0 
+    \end{cases} \\ 
+    &= \begin{cases}
+      \cout{\sigma\x} \concat w_* (\sem{\cif{\x>0}{\cfail}{\cskip}} \sigma) &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0
+    \end{cases} 
+  \end{aligned}
+\end{equation*}
+
+\begin{equation*}
+  \begin{aligned}
+    &= \begin{cases}
+      \cout{\sigma\x} \concat w_* (\sem{\cfail}\sigma) &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \cout{\sigma\x} \concat w_* \cabort{\sigma} &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si }\sigma\x \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \cout{\sigma\x, \cabort{\sigma}} &\text{ si }\sigma\x > 0 \\ 
+      \cout{\sigma} &\text{ si } \sigma\x \leq 0
+    \end{cases}
+  \end{aligned}
+\end{equation*}
+
+En base a esto, entonces, la semántica del while está dada por:
+\begin{equation*}
+  w = \sigma \mapsto \begin{cases}
+    \cout{\sigma\x, \cabort{\sigma}} &\text{ si }\sigma\x > 0 \\ 
+    \cout{\sigma} &\text{ si }\sigma\x \leq 0
+  \end{cases}
+\end{equation*}
+
+\end{document}
