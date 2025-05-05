@@ -62,6 +62,11 @@
 \newcommand{\cabort}[1]{\langle\textbf{abort}, #1\rangle}
 \newcommand{\cout}[1]{\langle #1\rangle}
 
+\newcommand{\iterm}[1]{\iota_\text{term}\left(#1\right)}
+\newcommand{\iabort}[1]{\iota_\text{abort}\left(#1\right)}
+\newcommand{\iout}[2]{\iota_\text{out}\left(#1,\ #2\right)}
+\newcommand{\iin}[2]{\iota_\text{in}\left(\lambda #1 \in \Z .\ #2\right)}
+
 \title{Trabajo práctico N° 6}
 \author{Emanuel Nicolás Herrador}
 \date{Mayo 2025}
@@ -275,5 +280,368 @@ En base a esto, entonces, la semántica del while está dada por:
     \cout{\sigma} &\text{ si }\sigma\x \leq 0
   \end{cases}
 \end{equation*}
+
+\section*{Ejercicio 3}
+En este ejercicio se pretende demostrar o refutar las equivalencias propuestas usando semántica denotacional.
+Veamos cada una de forma separada.
+
+\subsection*{Item A}
+Queremos analizar la equivalencia dada por $?x; ?y \equiv ?y; ?x$.
+Claramente no son equivalentes, por lo que se va a mostrar un contraejemplo.
+De este modo, sean $\x, \y \in \var$, entonces se va a ver $?\x; ?\y \equiv ?\y; ?\x$.
+La semántica de ambos programas es similar, por lo que me voy a concentrar en hacer la de la izquierda:
+\begin{equation*}
+  \begin{aligned}
+    \sem{?\x; ?\y}\sigma &= \sem{?\y}_* (\sem{?\x}\sigma) \\ 
+                         &= \sem{?\y}_* \iin{n}{\iterm{[\sigma\ |\ \x : n]}} \\ 
+                         &= \iin{n}{\sem{?y}[\sigma\ |\ \x : n]} \\ 
+                         &= \iin{n}{\iin{m}{\iterm{[\sigma\ |\ \x : n\ |\ \y : m]}}}
+  \end{aligned}
+\end{equation*}
+
+Análogamente, para el lado derecho tenemos que 
+\begin{equation*}
+  \sem{?\y; ?\x}\sigma = \iin{n}{\iin{m}{\iterm{[\sigma\ |\ \y : n\ |\ \x : m]}}}
+\end{equation*}
+
+Como claramente no se cumple para todo input posible la equivalencia, entonces no son equivalentes.
+
+\subsection*{Item B}
+Queremos analizar la equivalencia dada por $?x; z := x \equiv ?z$.
+Claramente no son equivalentes por lo que daré un contraejemplo.
+Sea $\x, \z \in \var$, analicemos $?\x; \z := \x \equiv ?\z$.
+Veamos primero el lado izquierdo:
+\begin{equation*}
+  \begin{aligned}
+    \sem{?\x; \z := \x}\sigma &= \sem{\z := \x}_* (\sem{?\x}\sigma) \\ 
+                              &= \sem{\z := \x}_* \iin{n}{\iterm{[\sigma\ |\ \x : n]}} \\ 
+                              &= \iin{n}{\sem{\z := \x}[\sigma\ |\ \x : n]} \\ 
+                              &= \iin{n}{\iterm{[\sigma\ |\ \x : n\ |\ \z : n]}}
+  \end{aligned}
+\end{equation*}
+
+Mientras que del lado derecho tenemos:
+\begin{equation*}
+  \sem{?\z}\sigma = \iin{n}{\iterm{[\sigma\ |\ \z : n]}}
+\end{equation*}
+
+Luego, entonces, no son equivalentes dado que el programa de la izquierda modifica el valor de $\x$ en el estado mientras que el de la derecha no.
+
+\subsection*{Item C}
+Queremos analizar la equivalencia dada por $\cnewvar{x}{e}{(?x; z := x)} \equiv ?z$.
+Parecería que sí son equivalentes pero en realidad no lo son por un caso particular.
+Notemos primero que $x, z$ son metavariables, por lo que estas pueden tomar cualquier variable del lenguaje.
+Teniendo esto en cuenta, para mostrar el contraejemplo vamos a considerar que ambas metavariables toman a la variable $\y \in \var$ del lenguaje.
+Con ello en mente, la equivalencia a analizar ahora es $\cnewvar{\y}{e}{(?\y; \y := \y)} \equiv ?\y$.
+Si vemos el lado izquierdo tenemos:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cnewvar{\y}{e}{(?\y; \y := \y)}}\sigma &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ \y : \sigma\y])_\dagger (\sem{?\y; \y := \y}[\sigma\ |\ \y : \sem{e}\sigma]) \\ 
+                                                 &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ \y : \sigma\y])_\dagger (\sem{\y := \y}_* (\sem{?\y}[\sigma\ |\ \y : \sem{e}\sigma])) \\ 
+                                                 &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ \y : \sigma\y])_\dagger (\sem{\y := \y}_* \iin{n}{\iterm{[\sigma\ |\ \y : n]}}) \\ 
+                                                 &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ \y : \sigma\y])_\dagger \iin{n}{\sem{\y := \y}[\sigma\ |\ \y : n]} \\ 
+                                                 &= (\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ \y : \sigma\y])_\dagger \iin{n}{\iterm{[\sigma\ |\ \y : n]}} \\ 
+                                                 &= \iin{n}{(\lambda \sigma' \in \Sigma .\ [\sigma'\ |\ \y : \sigma\y])[\sigma\ |\ \y : n]} \\ 
+                                                 &= \iin{n}{\iterm{\sigma}}
+  \end{aligned}
+\end{equation*}
+
+Mientras que si miramos el lado derecho tenemos:
+\begin{equation*}
+  \sem{?\y} = \iin{n}{[\sigma\ |\ \y : n]}
+\end{equation*}
+
+Con ello, entonces se muestra el contraejemplo dado que uno mantiene el estado intacto mientras que el otro programa no.
+Luego, no son programas equivalentes semánticamente.
+
+\section*{Ejercicio 4}
+Queremos analizar la equivalencia dada por $?\x; c; !\x \equiv ?\y; c; !\y$ donde $c$ es un programa que no incluye ni fallas, outputs ni inputs y es tal que $\{\x, \y\} \cap FV(c) = \emptyset$.
+Como esta equivalencia no es correcta, para refutarla voy a dar un contraejemplo donde $c \equiv \cskip$.
+Con ello en mente, se pretende analizar ahora $?\x; \cskip; !\x \equiv ?\y; c; !\y$.
+Ambos programas son similares y su cálculo de semántica es análogo.
+Por ello, me concentraré únicamente en calcularla para el programa de la izquierda:
+\begin{equation*}
+  \begin{aligned}
+    \sem{?\x; \cskip; !\x}\sigma &= \sem{\cskip; !\x}_* (\sem{?\x}\sigma) \\ 
+                                 &= \sem{\cskip; !\x}_* \iin{n}{\iterm{[\sigma\ |\ \x : n]}} \\ 
+                                 &= \iin{n}{\sem{\cskip; !\x}[\sigma\ |\ \x : n]} \\ 
+                                 &= \iin{n}{\sem{!\x}_* (\sem{\cskip}[\sigma\ |\ \x : n])} \\ 
+                                 &= \iin{n}{\sem{!\x}_* \iterm{[\sigma\ |\ \x : n]}} \\ 
+                                 &= \iin{n}{\sem{!\x}[\sigma\ |\ \x : n]} \\ 
+                                 &= \iin{n}{\iout{n}{\iterm{[\sigma\ |\ \x : n]}}}
+  \end{aligned}
+\end{equation*}
+
+Mientras que del lado derecho llegamos a:
+\begin{equation*}
+  \sem{?\y; \cskip; !\y}\sigma = \iin{n}{\iout{n}{\iterm{[\sigma\ |\ \y : n]}}}
+\end{equation*}
+
+Con ello, se muestra que son semánticas distintas porque se llega a un estado diferente debido que en el primero se modifica el valor asignado a $\x$ en el estado, mientras que en el segundo es el de $\y$.
+Finalmente, entonces, se muestra el contraejemplo de porqué estos dos programas no son equivalentes.
+
+\section*{Ejercicio 5}
+El diagrama de Hasse a considerar es el siguiente:
+\addfig{0.7}{06-05.png}
+
+\section*{Ejercicio 6}
+Se pretende dar un programa de modo que su semántica sea el supremo de la cadena:
+\begin{equation*}
+  w_0 = \bot, \qquad w_{i+1} = \iin{n}{\iout{n}{w_i}}
+\end{equation*}
+
+El programa que doy es $\cwhile{\ctrue}{?\x; !\x}$.
+Para ver que cumple con la condición del ejercicio, veamos su semántica:
+\begin{equation*}
+  \begin{aligned}
+    \sem{\cwhile{\ctrue}{?\x; !\x}}\sigma &= \begin{cases}
+                                            \sem{\cwhile{\ctrue}{?\x; !\x}}_* (\sem{?\x; !\x}\sigma) &\text{ si }\sem{\ctrue}\sigma \\ 
+                                            \iterm{\sigma} &\text{ si }\neg\sem{\ctrue}\sigma 
+                                          \end{cases} \\ 
+                                          &= \sem{\cwhile{\ctrue}{?\x; !\x}}_* (\sem{!\x}_* (\sem{?\x}\sigma)) \\ 
+                                          &= \sem{\cwhile{\ctrue}{?\x; !\x}}_* (\sem{!\x}_* \iin{n}{[\sigma\ |\ \x : n]}) \\ 
+                                          &= \sem{\cwhile{\ctrue}{?\x; !\x}}_* \iin{n}{\sem{!\x}[\sigma\ |\ \x : n]} \\ 
+                                          &= \sem{\cwhile{\ctrue}{?\x; !\x}}_* \iin{n}{\iout{n}{[\sigma\ |\ \x : n]}} \\ 
+                                          &= \iin{n}{\iout{n}{\sem{\cwhile{\ctrue}{?\x; !\x}}[\sigma\ |\ \x : n]}}
+  \end{aligned}
+\end{equation*}
+
+Con ello en mente, entonces, podemos considerar $F$ tal que, sea $w' = \sem{\cwhile{\ctrue}{?\x; !\x}}$:
+\begin{equation*}
+  F w' \sigma = \iin{n}{\iout{n}{w' [\sigma\ |\ \x : n]}}
+\end{equation*}
+
+Sabemos que $F$ es continua al provenir de un while y que por TMPF $w = \supr_{i \in \N} F^i \cfbotfo$.
+Ahora, lo único que resta mostrar es que la cadena $F^0 \cfbotfo \fleq F^1 \cfbotfo \fleq \dots$ es la misma que $w_0 \fleq w_1 \fleq \dots$.
+Esto lo vamos a hacer con inducción.
+Primero, veamos que para el caso base $F^0 \cfbotfo = \cfbotfo = w_0$ por lo que se cumple.
+Ahora, como HI suponemos que dado un $k \in \N$ se cumple que $F^k \cfbotfo = w_k$ y queremos ver $k+1$:
+\begin{equation*}
+  \begin{aligned}
+    F^{k+1} \cfbotfo &= \sigma \mapsto \iin{n}{\iout{n}{F^k \cfbotfo [\sigma\ |\ \x : n]}} \\ 
+                     &= \sigma \mapsto \iin{n}{\iout{n}{w_k [\sigma\ |\ \x : n]}}
+  \end{aligned}
+\end{equation*}
+
+Notemos que como $F w' \sigma = F w' [\sigma\ |\ \x : m]$ para $m \in \Z$, entonces se cumple que:
+\begin{equation*}
+  F^{k+1} \cfbotfo = \sigma \mapsto \iin{n}{\iout{n}{w_k \sigma}} = \iin{n}{\iout{n}{w_k}}
+\end{equation*}
+
+Con ello, se demuestra entonces el caso inductivo y que ambas cadenas son la misma.
+Finalmente, se demuestra que el programa dado cumple con la semántica pedida. $\qed$
+
+\section*{Ejercicio 7}
+Queremos ver si los programas de la forma $\cwhile{\ctrue}{(?x;c)}$ cumplen que la cadena $F^i \cfbotfo \sigma$ de la semántica del while es interesante o no en $\Omega$.
+Vamos a ver que no lo es por contraejemplo considerando $c \equiv \cfail$.
+Sea $w = \sem{\cwhile{\ctrue}{(?x;\cfail)}}$, tenemos:
+\begin{equation*}
+  \begin{aligned}
+    w\sigma &= \begin{cases}
+      w_* (\sem{?x; \cfail}\sigma) &\text{ si }\sem{\ctrue}\sigma \\ 
+      \iterm{\sigma} &\text{ si }\neg\sem{\ctrue}\sigma
+    \end{cases} \\ 
+            &= w_* (\sem{\cfail}_* (\sem{?x}\sigma)) \\ 
+            &= w_* (\sem{\cfail}_* \iin{n}{\iterm{[\sigma\ |\ \x : n]}}) \\ 
+            &= w_* \iin{n}{\sem{\cfail}[\sigma\ |\ \x : n]} \\ 
+            &= w_* \iin{n}{\iabort{[\sigma\ |\ \x : n]}} \\ 
+            &= \iin{n}{\iabort{[\sigma\ |\ \x : n]}}
+  \end{aligned}
+\end{equation*}
+
+Luego, tenemos que $Fw\sigma = \iin{n}{\iabort{[\sigma\ |\ \x : n]}}$, por lo que $\forall i \geq 1,\ F^{i} = F^{i+1}$.
+Por ello, entonces, en este caso no es una cadena interesante porque el supremo de esta cadena es $F^1 \cfbotfo \sigma$.
+
+\section*{Ejercicio 8}
+Vamos a ver el programa $P$ dado por:
+\begin{equation*}
+  P \equiv \cnewvar{\x}{\x+1}{(\cwhile{\x>0}{(?\x;\cif{\y>0}{\cfail}{!\x})})}
+\end{equation*}
+
+Y en los siguientes items calcularemos su semántica para los casos donde $\sigma\y>0$ y $\sigma\y \leq 0$.
+Primero, veamos en general la semántica para un estado $\sigma \in \Sigma$ cualquiera.
+
+Sea $w = \sem{\cwhile{\x>0}{(?\x; \cif{\y>0}{\cfail}{!\x})}}$:
+\begin{equation}
+  \tag*{(8.1)}
+  \begin{aligned}
+    & \sem{\cnewvar{\x}{\x+1}{(\cwhile{\x>0}{(?\x; \cif{\y>0}{\cfail}{!\x})})}} = \\ 
+    &= (\lambda \sigma' \in \Sigma .\ [\sigma' | \x : \sigma\x])_\dagger (w[\sigma\ |\ \x : \sigma\x+1])
+  \end{aligned}
+\end{equation}
+
+Ahora, nos concentremos primero en el while:
+\begin{equation}
+  \tag*{(8.2)}
+  \begin{aligned}
+    & w[\sigma\ |\ \x : \sigma\x+1] = \\ 
+    &= \begin{cases}
+        w_* (\sem{?\x; \cif{\y>0}{\cfail}{!\x}}[\sigma\ |\ \x : \sigma\x+1]) &\text{ si }\sem{\x>0}[\sigma\ |\ \x : \sigma\x+1] \\ 
+        \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\neg\sem{\x>0}[\sigma\ |\ \x : \sigma\x+1]
+      \end{cases} \\ 
+    &= \begin{cases}
+      w_* (\sem{\cif{\y>0}{\cfail}{!\x}}_* (\sem{?\x}[\sigma\ |\ \x : \sigma\x+1])) &\text{ si }\sigma\x+1 > 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      w_* (\sem{\cif{\y>0}{\cfail}{!\x}}_* \iin{n}{\iterm{[\sigma\ |\ \x : n]}}) &\text{ si }\sigma\x+1 > 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \iin{n}{w_* (\sem{\cif{\y>0}{\cfail}{!\x}} [\sigma\ |\ \x : n])} &\text{ si }\sigma\x+1 > 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \iin{n}{w_* (\sem{\cfail} [\sigma\ |\ \x : n])} &\text{ si }\sigma\x+1 > 0 \land \sigma\y > 0 \\ 
+      \iin{n}{w_* (\sem{!\x} [\sigma\ |\ \x : n])} &\text{ si }\sigma\x+1 > 0 \land \sigma\y \leq 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \iin{n}{w_* \iabort{[\sigma\ |\ \x : n]}} &\text{ si }\sigma\x+1 > 0 \land \sigma\y > 0 \\ 
+      \iin{n}{w_* \iout{n}{\iterm{[\sigma\ |\ \x : n]}}} &\text{ si }\sigma\x+1 > 0 \land \sigma\y \leq 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \iin{n}{\iabort{[\sigma\ |\ \x : n]}} &\text{ si }\sigma\x+1 > 0 \land \sigma\y > 0 \\ 
+      \iin{n}{\iout{n}{w [\sigma\ |\ \x : n]}} &\text{ si }\sigma\x+1 > 0 \land \sigma\y \leq 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+  \end{aligned}
+\end{equation}
+
+Obteniendo esto, ahora prosigamos con cada item por separado.
+
+\subsection*{Item A}
+Aquí se pretende calcular la semántica de $P$ en un estado $\sigma$ tal que $\sigma\y > 0$.
+Sea $\sigma \in \Sigma : \sigma\y > 0$, entonces si tomamos desde $(8.2)$ tenemos que:
+\begin{equation*}
+  \begin{aligned}
+    w[\sigma\ |\ \x : \sigma\x+1] &= \begin{cases}
+      \iin{n}{\iabort{[\sigma\ |\ \x : n]}} &\text{ si }\sigma\x+1 > 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Luego, como en ambos casos se establece una terminación, entonces esta es la semántica del while.
+Siguiendo con $(8.1)$ tendríamos que:
+\begin{equation*}
+  \begin{aligned}
+    & \sem{\cnewvar{\x}{\x+1}{(\cwhile{\x>0}{(?\x; \cif{\y>0}{\cfail}{!\x})})}} = \\ 
+    &= \begin{cases}
+      (\lambda \sigma' \in \Sigma .\ [\sigma' | \x : \sigma\x])_\dagger (\iin{n}{\iabort{[\sigma\ |\ \x : n]}}) &\text{ si }\sigma\x+1 > 0 \\ 
+      (\lambda \sigma' \in \Sigma .\ [\sigma' | \x : \sigma\x])_\dagger (\iterm{[\sigma\ |\ \x : \sigma\x+1]}) &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \iin{n}{\iabort{(\lambda \sigma' \in \Sigma .\ [\sigma' | \x : \sigma\x]) [\sigma\ |\ \x : n]}} &\text{ si }\sigma\x+1 > 0 \\ 
+      \iterm{(\lambda \sigma' \in \Sigma .\ [\sigma' | \x : \sigma\x]) [\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases} \\ 
+    &= \begin{cases}
+      \iin{n}{\iabort{\sigma}} &\text{ si }\sigma\x > -1 \\ 
+      \iterm{\sigma} &\text{ si }\sigma\x \leq -1
+    \end{cases}
+  \end{aligned}
+\end{equation*}
+por lo que se obtiene la semántica del programa para estados donde $\sigma\y > 0$.
+
+\subsection*{Item B}
+Ahora, consideramos los estados con $\sigma\y \leq 0$.
+Es decir, sea $\sigma \in \Sigma : \sigma\y \leq 0$, tenemos que a partir de $(8.2)$:
+\begin{equation*}
+  \begin{aligned}
+    w[\sigma\ |\ \x : \sigma\x+1] &= \begin{cases}
+      \iin{n}{\iout{n}{w [\sigma\ |\ \x : n]}} &\text{ si }\sigma\x+1 > 0 \\ 
+      \iterm{[\sigma\ |\ \x : \sigma\x+1]} &\text{ si }\sigma\x+1 \leq 0
+    \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Sea $\sigma' = [\sigma\ |\ \x : \sigma\x+1] \in \Sigma$, entonces queda claro que la $F$ para la definición del while está dada por:
+\begin{equation*}
+  Fw\sigma' = \begin{cases}
+    \iin{n}{\iout{n}{w [\sigma'\ |\ \x : n]}} &\text{ si }\sigma'\x > 0 \\ 
+    \iterm{\sigma'} &\text{ si }\sigma'\x \leq 0
+  \end{cases}
+\end{equation*}
+
+Con ello en mente, veamos algunos casos para $F^i \cfbotfo$:
+\begin{equation*}
+  \begin{aligned}
+    F^0 \cfbotfo &= \cfbotfo \\ 
+    \\ 
+    F^1 \cfbotfo &= \sigma' \mapsto \begin{cases}
+                  \iin{n}{\iout{n}{\cfbotfo [\sigma'\ |\ \x : n]}} &\text{ si }\sigma'\x > 0 \\ 
+                  \iterm{\sigma'} &\text{ si }\sigma'\x \leq 0
+                \end{cases} \\ 
+                 &= \sigma' \mapsto \begin{cases}
+                  \iin{n}{\iout{n}{\bot}} &\text{ si }\sigma'\x > 0 \\ 
+                  \iterm{\sigma'} &\text{ si }\sigma'\x \leq 0
+                 \end{cases} \\ 
+                 \\ 
+    F^2 \cfbotfo &= \sigma' \mapsto \begin{cases}
+                  \iin{n}{\iout{n}{F \cfbotfo [\sigma'\ |\ \x : n]}} &\text{ si }\sigma'\x > 0 \\ 
+                  \iterm{\sigma'} &\text{ si }\sigma'\x \leq 0
+                \end{cases} \\ 
+                 &= \sigma' \mapsto \begin{cases}
+                   \iin{n}{\iout{n}{\iin{m}{\iout{m}{\bot}}}} &\text{ si }\sigma'>0 \land n > 0 \\ 
+                   \iin{n}{\iout{n}{\iterm{[\sigma'\ |\ \x : n]}}} &\text{ si }\sigma'\x>0 \land n \leq 0 \\ 
+                   \iterm{\sigma'} &\text{ si }\sigma'\x \leq 0
+                 \end{cases}
+  \end{aligned}
+\end{equation*}
+
+Claramente se puede notar que la continuación del while depende del valor del input en la iteración para $\x$.
+Motivo de ello, entonces, no se puede dar una expresión general para este caso del programa.
+
+\section*{Ejercicio 9}
+En este ejercicio se pretende demostrar o refutar las equivalencias propuestas usando semántica denotacional.
+Veamos cada una de ellas por separado.
+
+\subsection*{Item A}
+Queremos analizar la equivalencia:
+\begin{equation*}
+  ?\x; \cwhile{b}{(!\x; ?\x)}; !\x \ \equiv \ \cwhile{b}{?\x; !\x}
+\end{equation*}
+
+Vamos a mostrar que no es correcta dando un contraejemplo.
+Sea $b \equiv \cfalse$, $w_1 = \sem{\cwhile{\cfalse}{(!\x;?\x)}}$ y $w_2 = \sem{\cwhile{\cfalse}{?\x;!\x}}$, entonces:
+\begin{equation*}
+  \begin{aligned}
+    \sem{?\x; \cwhile{\cfalse}{(!\x; ?\x)}; !\x} \sigma &= \sem{\cwhile{\cfalse}{(!\x; ?\x)}; !\x}_* (\sem{?\x}\sigma) \\ 
+                                                        &= \sem{\cwhile{\cfalse}{(!\x; ?\x)}; !\x}_* \iin{n}{\iterm{[\sigma\ |\ \x : n]}} \\ 
+                                                        &= \iin{n}{\sem{\cwhile{\cfalse}{(!\x; ?\x)}; !\x} [\sigma\ |\ \x : n]} \\ 
+                                                        &= \iin{n}{\sem{!\x}_* (w_1[\sigma\ |\ \x : n])} \\ 
+                                                        &= \begin{cases}
+                                                          \iin{n}{\sem{!\x}_* ({w_1}_* (\sem{!\x; ?\x}[\sigma\ |\ \x : n]))} &\text{ si } \sem{\cfalse}\sigma \\ 
+                                                          \iin{n}{\sem{!\x}_* \iterm{[\sigma\ |\ \x : n]}} &\text{ si }\neg\sem{\cfalse}\sigma
+                                                        \end{cases} \\ 
+                                                        &= \iin{n}{\sem{!\x} [\sigma\ |\ \x : n]} \\ 
+                                                        &= \iin{n}{\iout{n}{[\sigma\ |\ \x : n]}}
+  \end{aligned}
+\end{equation*}
+
+Y para el programa de la derecha tenemos que:
+\begin{equation*}
+  \begin{aligned}
+    w_2 \sigma &= \begin{cases}
+                {w_2}_* (\sem{?\x; !\x} \sigma) &\text{ si }\sem{\cfalse}\sigma \\ 
+                \iterm{\sigma} &\text{ si }\neg\sem{\cfalse}\sigma 
+              \end{cases} \\ 
+               &= \iterm{\sigma}
+  \end{aligned}
+\end{equation*}
+
+Luego, entonces, con ello llegamos claramente a que para $b \equiv \cfalse$ ambos programas tienen una semántica distinta por lo que no son equivalentes.
+Con ello, se muestra el contraejemplo para refutar esta propuesta de equivalencia.
+
+\subsection*{Item B}
+Queremos analizar ahora la equivalencia dada por:
+\begin{equation*}
+  ?\x; \cwhile{b}{(!\x; ?\x)}; !\x \ \equiv \ ?\x; !\x; \cwhile{b}{?\x; !\x}
+\end{equation*}
+
+Es una equivalencia correcta, por lo que hay que demostrarla.
+Intuyo que es algo larga y con varios casos para ver y explicar, por lo que no lo voy a realizar.
+En caso que tenga más tiempo, lo hago.
 
 \end{document}
