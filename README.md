@@ -1,3 +1,8 @@
+> [!note]
+> This repository contains theoretical notes, practical exercises, and a final project developed for the Language and Compilers course of the Computer Science degree at FAMAF – Universidad Nacional de Córdoba.
+>
+> All materials are in Spanish, as they were written for academic use and submission.
+
 # Lenguajes y Compiladores
 
 El presente repositorio contiene todo el material correspondiente a la cursada de la materia de _Lenguajes y Compiladores_ de 5to año de la Licenciatura en Ciencias de la Computación de FAMAF durante el año 2025.
