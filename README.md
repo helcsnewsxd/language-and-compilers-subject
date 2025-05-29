@@ -32,6 +32,7 @@ El equipo docente está conformado por:
 | LIS con input y output                                 | Más sobre dominios <br /> Input y output                                                                | [(1)](./theory/slides/05-list_with_input_and_output.pdf)                                                                                                                           | [PDF](./theory/notes/03-imperative_language.pdf)                                                                                   |
 | Cálculo Lambda | Sintaxis <br /> Reducción <br /> Evaluación <br /> Semántica Denotacional (normal, eager) | [(1)](./theory/slides/06-lambda_calculus.pdf) | [PDF](./theory/notes/06-lambda_calculus.pdf) |
 | Lenguajes Aplicativos | Evaluación eager <br /> Evaluación normal <br /> Tuplas <br /> Semánticas denotacionales en profundidad <br /> Recursión | [(1)](./theory/slides/07-aplicative_languages.pdf) |
+| Lenguajes Iswim-like | (Des)Referencia <br /> Asignación <br /> Igualdad <br /> Fragmentos imperativos <br /> Estado y semántica operacional <br /> Fragmento aplicativo <br /> Semántica denotacional | [(1)](./theory/slides/08-iswim.pdf) | [PDF](./theory/notes/08-iswim.pdf) |
 
 </div>
 
