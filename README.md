@@ -46,5 +46,7 @@ El equipo docente está conformado por:
 | 4    | [PDF](./exercises/statements/04.pdf) | [PDF](./exercises/solutions/04.pdf) |
 | 5    | [PDF](./exercises/statements/05.pdf) | [PDF](./exercises/solutions/05.pdf) |
 | 6    | [PDF](./exercises/statements/06.pdf) | [PDF](./exercises/solutions/06.pdf) |
+| 7 | [PDF](./exercises/statements/07.pdf) | |
+|8 | [PDF](./exercises/statements/08.pdf) | |
 
 </div>
