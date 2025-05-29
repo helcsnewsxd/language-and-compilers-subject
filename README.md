@@ -31,6 +31,7 @@ El equipo docente está conformado por:
 | LIS con fallas, semántica denotacional y operacional   | LIS con fallas <br /> Semántica operacional <br /> Teorema de Corrección                                | [(1)](./theory/slides/04-part_1-lis_with_fails.pdf) <br /> [(2)](./theory/slides/04-part_2-operational_semantic.pdf)                                                               | [PDF](./theory/notes/03-imperative_language.pdf)                                                                                   |
 | LIS con input y output                                 | Más sobre dominios <br /> Input y output                                                                | [(1)](./theory/slides/05-list_with_input_and_output.pdf)                                                                                                                           | [PDF](./theory/notes/03-imperative_language.pdf)                                                                                   |
 | Cálculo Lambda | Sintaxis <br /> Reducción <br /> Evaluación <br /> Semántica Denotacional (normal, eager) | [(1)](./theory/slides/06-lambda_calculus.pdf) | [PDF](./theory/notes/06-lambda_calculus.pdf) |
+| Lenguajes Aplicativos | Evaluación eager <br /> Evaluación normal <br /> Tuplas <br /> Semánticas denotacionales en profundidad <br /> Recursión | [(1)](./theory/slides/07-aplicative_languages.pdf) |
 
 </div>
 
