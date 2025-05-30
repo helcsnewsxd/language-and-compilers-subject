@@ -1,0 +1,655 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+
+\geometry{
+  a4paper,
+  total = {170mm, 257mm},
+  left = 20mm,
+  top = 20mm,
+}
+\graphicspath{ {./images/} }
+
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+
+\newtheorem*{theorem*}{Teorema}
+\newtheorem*{lemma*}{Lema}
+
+\newcommand{\addfig}[2]{\begin{figure}[!htb] \centering \includegraphics[width=#1\textwidth]{#2}\end{figure}}
+
+\newcommand{\aexp}[1]{\langle\text{#1}\rangle}
+\newcommand{\intexp}{\aexp{intexp}}
+\newcommand{\var}{\aexp{var}}
+\newcommand{\assert}{\aexp{assert}}
+\newcommand{\boolexp}{\aexp{boolexp}}
+\newcommand{\comm}{\aexp{comm}}
+\newcommand{\sem}[1]{\left\llbracket #1\right\rrbracket}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\B}{\mathbb{B}}
+
+\newcommand{\x}{\textbf{x}}
+\newcommand{\y}{\textbf{y}}
+\newcommand{\z}{\textbf{z}}
+
+\newcommand{\supr}{\bigsqcup\limits}
+
+\newcommand{\concat}{\texttt{ ++ }}
+
+\newcommand{\fleq}{\sqsubseteq}
+\newcommand{\cdom}{\Sigma \to \Sigma_\bot}
+\newcommand{\cdomf}{\Sigma \to \Sigma_\bot'}
+\newcommand{\cdomfo}{\Sigma \to \Omega}
+\newcommand{\cfbot}{\bot_{\cdom}}
+\newcommand{\cfbotf}{\bot_{\cdomf}}
+\newcommand{\cfbotfo}{\bot_{\cdomfo}}
+\newcommand{\bbot}{\bot\!\!\!\bot}
+\newcommand{\ctrue}{\textbf{true}}
+\newcommand{\cfalse}{\textbf{false}}
+\newcommand{\cskip}{\textbf{skip}}
+\newcommand{\cif}[3]{\textbf{if }#1\textbf{ then }#2\textbf{ else }#3}
+\newcommand{\cnewvar}[3]{\textbf{newvar }#1 := #2\textbf{ in }#3}
+\newcommand{\cwhile}[2]{\textbf{while }#1\textbf{ do }#2}
+\newcommand{\cfor}[4]{\textbf{for }#1 := #2\text{ to }#3\text{ do }#4}
+\newcommand{\cfail}{\textbf{fail}}
+\newcommand{\ccatch}[2]{\textbf{catchin }#1\textbf{ with }#2}
+\newcommand{\cabort}[1]{\langle\textbf{abort}, #1\rangle}
+\newcommand{\cout}[1]{\langle #1\rangle}
+
+\newcommand{\iterm}[1]{\iota_\text{term}\left(#1\right)}
+\newcommand{\iabort}[1]{\iota_\text{abort}\left(#1\right)}
+\newcommand{\iout}[2]{\iota_\text{out}\left(#1,\ #2\right)}
+\newcommand{\iin}[2]{\iota_\text{in}\left(\lambda #1 \in \Z .\ #2\right)}
+
+\title{Trabajo práctico N° 7}
+\author{Emanuel Nicolás Herrador}
+\date{Mayo 2025}
+
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 1em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+\noindent\begin{tabular}{@{}ll}
+	Estudiante & \theauthor \\
+\end{tabular}
+
+\section*{Ejercicio 1}
+Veamos cada una de las expresiones en un item separado para mayor claridad.
+
+\subsection*{Item A}
+\begin{equation*}
+  \begin{aligned}
+    (\lambda f. \lambda x. f(fx)) (\lambda z. \lambda x. \lambda y. zyx) (\lambda z. \lambda w. z) &\equiv (\lambda f. \lambda t. f(ft))(\lambda z. \lambda x. \lambda y. zyx)(\lambda z.\lambda w. z) \\ 
+                                                                                                   &\to (\lambda t. (\lambda z.\lambda x.\lambda y. zyx)((\lambda z.\lambda x.\lambda y. zyx)t))(\lambda z.\lambda w. z) \\ 
+                                                                                                   &\to (\lambda t. (\lambda z.\lambda x.\lambda y. zyx)(\lambda x.\lambda y. tyx))(\lambda z.\lambda w. z) \\ 
+                                                                                                   &\equiv (\lambda t. (\lambda z.\lambda s.\lambda u. zus)(\lambda x.\lambda y. tyx))(\lambda z.\lambda w. z) \\ 
+                                                                                                   &\to (\lambda t.\lambda s.\lambda u. (\lambda x.\lambda y. tyx)us)(\lambda z.\lambda w. z) \\ 
+                                                                                                   &\to (\lambda t.\lambda s.\lambda u. (\lambda y. tyu)s)(\lambda z.\lambda w. z) \\ 
+                                                                                                   &\to (\lambda t.\lambda s.\lambda u. tsu)(\lambda z.\lambda w. z) \\ 
+                                                                                                   &\to \lambda s.\lambda u. (\lambda z.\lambda w. z)su \qquad\text{forma canónica}\\
+                                                                                                   &\to \lambda s.\lambda u. (\lambda w. s)u \\ 
+                                                                                                   &\to \lambda s.\lambda u. s
+  \end{aligned}
+\end{equation*}
+
+Luego, $(\lambda f. \lambda x. f(fx)) (\lambda z. \lambda x. \lambda y. zyx) (\lambda z. \lambda w. z) \to^* \lambda s.\lambda u. (\lambda z.\lambda w. z)su \to^* \lambda s.\lambda u. s$.
+
+\subsection*{Item B}
+\begin{equation*}
+  \begin{aligned}
+    (\lambda z. zz)(\lambda f.\lambda x. f(fx)) &\to (\lambda f.\lambda x. f(fx))(\lambda f.\lambda x. f(fx)) \\ 
+                                                &\equiv (\lambda f.\lambda t. f(ft))(\lambda f.\lambda x. f(fx)) \\ 
+                                                &\to \lambda t. (\lambda f.\lambda x. f(fx))((\lambda f.\lambda x. f(fx))t) \qquad\text{forma canónica} \\ 
+                                                &\to \lambda t. (\lambda f.\lambda x. f(fx))(\lambda x. t(tx)) \\ 
+                                                &\equiv \lambda t. (\lambda f.\lambda y. f(fy))(\lambda x. t(tx)) \\ 
+                                                &\to \lambda t.\lambda y. (\lambda x. t(tx))((\lambda x. t(tx))y) \\ 
+                                                &\to \lambda t.\lambda y. (\lambda x. t(tx))(t(ty)) \\ 
+                                                &\to \lambda t.\lambda y. t(t(t(ty))) 
+  \end{aligned}
+\end{equation*}
+
+Luego, $(\lambda z. zz)(\lambda f.\lambda x. f(fx)) \to^* \lambda t. (\lambda f.\lambda x. f(fx))((\lambda f.\lambda x. f(fx))t) \to^* \lambda t.\lambda y. t(t(t(ty)))$.
+
+\section*{Ejercicio 2}
+Consideramos lo siguiente:
+\begin{equation*}
+  \begin{aligned}
+    TRUE &= \lambda x.\lambda y. x \\ 
+    FALSE &= \lambda x.\lambda y. y \\ 
+    NOT &= \lambda b.\lambda x.\lambda y. byx \\ 
+    AND &= \lambda b.\lambda c.\lambda x.\lambda y. b(cxy)y \\ 
+    IF &= \lambda b.\lambda x.\lambda y. bxy 
+  \end{aligned}
+\end{equation*}
+
+Y, en base a ello, tenemos que demostrar varias relaciones de reducción.
+Veamos cada una de ella en items separados para mayor claridad.
+
+\subsection*{Item A}
+\begin{lemma*}
+  $NOT\ TRUE \to^* FALSE$.
+\end{lemma*}
+\begin{proof}
+  Para demostrarlo, veamos la reducción correspondiente:
+  \begin{equation*}
+    \begin{aligned}
+      NOT\ TRUE &\equiv (\lambda b.\lambda x.\lambda y. byx)\ TRUE \\
+               &\to \lambda x.\lambda y. TRUEyx \\ 
+               &\equiv \lambda x.\lambda y. (\lambda s.\lambda t. s)yx \\ 
+               &\to \lambda x.\lambda y. (\lambda t. y)x \\ 
+               &\to \lambda x.\lambda y. y \\ 
+               &\equiv FALSE
+    \end{aligned}
+  \end{equation*}
+  por lo que llegamos a que $NOT\ TRUE \to^* FALSE$ y se demuestra.
+\end{proof}
+
+\subsection*{Item B}
+\begin{lemma*}
+  $IF\ TRUE\ e_0 e_1 \to^* e_0$.
+\end{lemma*}
+\begin{proof}
+  Para demostrarlo, veamos la siguiente reducción:
+  \begin{equation*}
+    \begin{aligned}
+      IF\ TRUE\ e_0 e_1 &\equiv (\lambda b. \lambda x. \lambda y. bxy)\ TRUE\ e_0 e_1 \\ 
+                        &\to (\lambda x. \lambda y. TRUE\ xy) e_0 e_1 \\ 
+                        &\to (\lambda y. TRUE\ e_0 y) e_1 \\ 
+                        &\to TRUE\ e_0 e_1 \\ 
+                        &\equiv (\lambda x.\lambda y. x) e_0 e_1 \\ 
+                        &\to (\lambda y. e_0) e_1 \\ 
+                        &\to e_0
+    \end{aligned}
+  \end{equation*}
+  Por ello, entonces, $IF\ TRUE\ e_0 e_1 \to^* e_0$ y se demuestra.
+\end{proof}
+
+\subsection*{Item C}
+\begin{lemma*}
+  $AND\ TRUE\ TRUE \to^* TRUE$.
+\end{lemma*}
+\begin{proof}
+  Para demostrarlo, veamos la siguiente reducción:
+  \begin{equation*}
+    \begin{aligned}
+      AND\ TRUE\ TRUE &\equiv (\lambda b.\lambda c.\lambda x.\lambda y. b(cxy)y)\ TRUE\ TRUE \\ 
+                      &\to (\lambda c.\lambda x.\lambda y.\ TRUE(cxy)y)\ TRUE \\ 
+                      &\to \lambda x.\lambda y.\ TRUE(TRUE\ xy)y \\ 
+                      &\equiv \lambda x.\lambda y. (\lambda s.\lambda t. s)(TRUE\ xy)y \\ 
+                      &\to \lambda x.\lambda y.\ (\lambda t.\ (TRUE\ xy))y \\ 
+                      &\to \lambda x.\lambda y.\ TRUE\ xy \\ 
+                      &\equiv \lambda x.\lambda y.\ (\lambda s.\lambda t. s)xy \\ 
+                      &\to \lambda x.\lambda y. (\lambda t. x)y \\ 
+                      &\to \lambda x.\lambda y. x \\ 
+                      &\equiv TRUE
+    \end{aligned}
+  \end{equation*}
+  Por ello, $AND\ TRUE\ TRUE \to^* TRUE$ y se demuestra.
+\end{proof}
+
+\subsection*{Item D}
+\begin{lemma*}
+  $AND\ FALSE\ e \to^* FALSE$.
+\end{lemma*}
+\begin{proof}
+  Para demostrarlo, veamos la siguiente reducción:
+  \begin{equation*}
+    \begin{aligned}
+      AND\ FALSE\ e &\equiv (\lambda b.\lambda c.\lambda x.\lambda y.\ b(cxy)y)\ FALSE\ e \\ 
+                    &\to (\lambda c.\lambda x.\lambda y.\ FALSE(cxy)y)e \\ 
+                    &\to \lambda x.\lambda y.\ FALSE(exy)y \\ 
+                    &\equiv \lambda x.\lambda y. (\lambda s.\lambda t. t)(exy)y \\ 
+                    &\to \lambda x.\lambda y. (\lambda t. t)y \\ 
+                    &\to \lambda x.\lambda y. y \\ 
+                    &\equiv FALSE
+    \end{aligned}
+  \end{equation*}
+  Por ello, tenemos que $AND\ FALSE\ e \to^* FALSE$ y se demuestra.
+\end{proof}
+
+\section*{Ejercicio 3}
+Queremos ver cuáles de las siguientes afirmaciones son verdaderas y cuáles falsas justificando el porqué.
+Veamos cada una por separado en una enumeración:
+\begin{enumerate}[label=(\alph*)]
+  \item ``Toda expresión lambda cerrada tiene forma normal''.
+
+    \textbf{Falso} con $\lambda y.\ \Delta\Delta \equiv \lambda y. (\lambda x. xx)(\lambda x. xx)$ como contraejemplo dado que sabemos que no tiene forma normal y es una expresión lambda cerrada.
+
+  \item ``Toda expresión lambda cerrada tiene forma canónica''.
+
+    \textbf{Verdadero}. En particular, una expresión lambda es una abstracción, la cual es la que consideramos como forma canónica en el Cálculo Lambda.
+
+  \item ``Toda forma canónica cerrada es forma normal''.
+
+    \textbf{Falso} con $\lambda y. \Delta\Delta$ como contraejemplo.
+
+  \item ``Toda forma normal cerrada es forma canónica''.
+
+    \textbf{Verdadero}.
+    \begin{proof}
+      Sea $e$ una forma normal cerrada, por propiedad, sabemos que una aplicación cerrada no puede ser una forma normal.
+      Por contrarrecíproca, esto implica que una forma normal no puede ser una aplicación cerrada.
+      Luego, $e$ no es una aplicación cerrada por lo que, o bien es una variable (no porque contradice el hecho de que es cerrada), o bien es una abstracción.
+      Por ello, llegamos a que $e \equiv \lambda v. e'$ para $v$ variable y $e'$ expresión.
+
+      Finalmente, entonces, esto implica que $e$ es una forma canónica por lo que se demuestra.
+    \end{proof}
+\end{enumerate}
+
+\section*{Ejercicio 4}
+Se pretende demostrar el siguiente lema:
+\begin{lemma*}
+  Una aplicación cerrada no puede ser una forma normal.
+\end{lemma*}
+
+Para ello, veamos que:
+\begin{proof}
+  Sea $e$ una aplicación cerrada, entonces $e = e_0 e_1 \dots e_n$ para $e_i$ expresiones ($0 \leq i \leq n$) donde $e_0$ no es una aplicación ni una variable y $e \geq 1$.
+  Luego, $e_0$ es una abstracción por lo que $e$ contiene el redex $e_0 e_1$.
+  Por ello, no es forma normal y se demuestra el lema.
+\end{proof}
+
+\section*{Ejercicio 5}
+Veamos cada expresión por separado.
+
+\subsection*{Item A}
+Tenemos la expresión $(\lambda f.\lambda x.\ f(fx))(\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z)$.
+Primero, la evaluemos en orden normal:
+\begin{equation*}
+  \begin{aligned}
+    &(\lambda f.\lambda x.\ f(fx))(\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z) \Rightarrow_N \\ 
+    &\quad\left[
+      \begin{aligned}
+        &(\lambda f.\lambda x.\ f(fx))(\lambda z.\lambda x.\lambda y.\ zyx) \Rightarrow_N \\ 
+          &\quad\left[\lambda f.\lambda x.\ f(fx) \Rightarrow_N \lambda f.\lambda x.\ f(fx)\right. \\ 
+          &\quad\left[
+            \begin{aligned}
+              &((\lambda x.\ f(fx))/f \to (\lambda z.\lambda x.\lambda y.\ zyx)) \Rightarrow_N \\
+              &\Rightarrow_N \lambda w.\ (\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)w) \\
+            \end{aligned}
+          \right. \\ 
+        &\Rightarrow_N \lambda w.\ (\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)w) \\
+      \end{aligned}
+    \right. \\
+    &\quad\left[
+      \begin{aligned}
+        &(((\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)w)) / w \to \lambda z.\lambda w.\ z) \Rightarrow_N \\ 
+        &\Rightarrow_N (\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z)) \\ 
+          &\quad\left[\lambda z.\lambda x.\lambda y.\ zyx \Rightarrow_N \lambda z.\lambda x.\lambda y.\ zyx\right. \\ 
+          &\quad\left[
+            \begin{aligned}
+              &((\lambda x.\lambda y.\ zyx) / z \to ((\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z))) \Rightarrow_N \\ 
+              &\Rightarrow_N \lambda s.\lambda t.\ (\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z)yx
+            \end{aligned}
+          \right. \\ 
+        &\Rightarrow_N \lambda s.\lambda t.\ (\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z)yx \\
+      \end{aligned}
+    \right. \\ 
+    &\Rightarrow_N \lambda s.\lambda t.\ (\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z)yx
+  \end{aligned}
+\end{equation*}
+
+Y ahora la evaluemos en orden eager:
+\begin{equation*}
+  \begin{aligned}
+    &(\lambda f.\lambda x.\ f(fx))(\lambda z.\lambda x.\lambda y.\ zyx)(\lambda z.\lambda w.\ z) \Rightarrow_E \\
+    &\quad\left[
+      \begin{aligned}
+        &(\lambda f.\lambda x.\ f(fx))(\lambda z.\lambda x.\ zyx) \Rightarrow_E \\ 
+        &\quad\left[
+          \begin{aligned}
+            &\lambda f.\lambda x.\ f(fx) \Rightarrow_E \lambda f.\lambda x.\ f(fx)
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &\lambda z.\lambda x.\lambda y.\ zyx \Rightarrow_E \lambda z.\lambda x.\lambda y.\ zyx
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &((\lambda x.\ f(fx)) / f \to (\lambda z.\lambda x.\ zyx)) \Rightarrow_E \\ 
+            &\Rightarrow_E \lambda t.\ (\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)t)
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_E \lambda t.\ (\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)t)
+      \end{aligned}
+    \right. \\ 
+    &\quad\left[
+      \begin{aligned}
+        &\lambda z.\lambda w.\ z \Rightarrow_E \lambda z.\lambda w.\ z
+      \end{aligned}
+    \right. \\ 
+    &\quad\left[
+      \begin{aligned}
+        &(((\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)t)) / t \to (\lambda z.\lambda w.\ z)) \Rightarrow_E \\ 
+        &\Rightarrow_E (\lambda z.\lambda x.\lambda y.\ zyx)((\lambda z.\lambda x.\lambda y.\ zyx)(\lambda t.\lambda w.\ t)) \\ 
+        &\quad\left[
+          \begin{aligned}
+            &\lambda z.\lambda x.\lambda y.\ zyx \Rightarrow_E \dots
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &(\lambda z.\lambda x.\lambda y.\ zyx)(\lambda t.\lambda w.\ t) \Rightarrow_E \\ 
+            &\quad\left[
+              \begin{aligned}
+                &\lambda z.\lambda x.\lambda y.\ zyx \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\ 
+            &\quad\left[
+              \begin{aligned}
+                &\lambda t.\lambda w.\ t \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\ 
+            &\quad\left[
+              \begin{aligned}
+                &(\lambda x.\lambda y.\ zyx) / z \to (\lambda t.\lambda w.\ t) \Rightarrow_E \\ 
+                &\Rightarrow_E \lambda x.\lambda y.\ (\lambda t.\lambda w.\ t)yx
+              \end{aligned}
+            \right. \\ 
+            &\Rightarrow_E \lambda x.\lambda y.\ (\lambda t.\lambda w.\ t)yx
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &(\lambda x.\lambda y.\ zyx) / z \to (\lambda x.\lambda y.\ (\lambda t.\lambda w.\ t)yx) \Rightarrow_E \\
+            &\Rightarrow_E \lambda x.\lambda y.\ (\lambda s.\lambda r.\ (\lambda t.\lambda w.\ t)rs)yx
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_E \lambda x.\lambda y.\ (\lambda s.\lambda r.\ (\lambda t.\lambda w.\ t)rs)yx
+      \end{aligned}
+    \right. \\ 
+    &\Rightarrow_E \lambda x.\lambda y.\ (\lambda s.\lambda r.\ (\lambda t.\lambda w.\ t)rs)yx 
+  \end{aligned}
+\end{equation*}
+
+\subsection*{Item B}
+Tenemos la expresión $(\lambda z.\ zz)(\lambda f.\lambda x.\ f(fx))$.
+Primero la evaluemos en orden normal:
+\begin{equation*}
+  \begin{aligned}
+    &(\lambda z.\ zz)(\lambda f.\lambda x.\ f(fx)) \Rightarrow_N \\
+    &\quad\left[
+      \begin{aligned}
+        &\lambda z.\ zz \Rightarrow_N \dots
+      \end{aligned}
+    \right. \\ 
+    &\quad\left[
+      \begin{aligned}
+        &(zz) / z \to (\lambda f.\lambda x.\ f(fx)) \Rightarrow_N \\ 
+        &\Rightarrow_N (\lambda f.\lambda x.\ f(fx))(\lambda f.\lambda x.\ f(fx)) \\
+        &\quad\left[
+          \begin{aligned}
+            &\lambda f.\lambda x.\ f(fx) \Rightarrow_N \dots
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &(\lambda x.\ f(fx)) / f \to (\lambda f.\lambda x.\ f(fx)) \Rightarrow_N \\ 
+            &\lambda y.\ (\lambda f.\lambda x.\ f(fx))((\lambda f.\lambda x.\ f(fx))y)
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_N \lambda y.\ (\lambda f.\lambda x.\ f(fx))((\lambda f.\lambda x.\ f(fx))y)
+      \end{aligned}
+    \right. \\ 
+    &\Rightarrow_N \lambda y.\ (\lambda f.\lambda x.\ f(fx))((\lambda f.\lambda x.\ f(fx))y)
+  \end{aligned}
+\end{equation*}
+
+Y en orden eager tenemos:
+\begin{equation*}
+  \begin{aligned}
+    &(\lambda z.\ zz)(\lambda f.\lambda x.\ f(fx)) \Rightarrow_E \\
+    &\quad\left[
+      \begin{aligned}
+        &\lambda z.\ zz \Rightarrow_E \dots
+      \end{aligned}
+    \right. \\ 
+    &\quad\left[
+      \begin{aligned}
+        &\lambda f.\lambda x.\ f(fx) \Rightarrow_E \dots
+      \end{aligned}
+    \right. \\ 
+    &\quad\left[
+      \begin{aligned}
+        &(zz) / z \to (\lambda f.\lambda x.\ f(fx)) \Rightarrow_E \\
+        &\Rightarrow_E (\lambda f.\lambda x.\ f(fx))(\lambda f.\lambda x.\ f(fx)) \\
+        &\quad\left[
+          \begin{aligned}
+            &\lambda f.\lambda x.\ f(fx) \Rightarrow_E \dots
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &\lambda f.\lambda x.\ f(fx) \Rightarrow_E \dots
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &(\lambda x.\ f(fx)) / f \to (\lambda f.\lambda x.\ f(fx)) \Rightarrow_E \\ 
+            &\Rightarrow_E \lambda y.\ (\lambda f.\lambda x.\ f(fx))((\lambda f.\lambda x.\ f(fx))y) 
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_E \lambda y.\ (\lambda f.\lambda x.\ f(fx))((\lambda f.\lambda x.\ f(fx))y)
+      \end{aligned}
+    \right. \\ 
+    &\Rightarrow_E \lambda y.\ (\lambda f.\lambda x.\ f(fx))((\lambda f.\lambda x.\ f(fx))y)
+  \end{aligned}
+\end{equation*}
+
+\section*{Ejercicio 6}
+El \textbf{item A} lo paso para poder completar varios ejercicios para el parcial.
+
+Respecto al \textbf{item B}, es verdadero por el punto (a) y luego el Teorema de Church-Rosser.
+
+\section*{Ejercicio 7}
+No es cierto que $NOT\ TRUE \Rightarrow FALSE$ porque se llega a una forma canónica antes.
+En particular, se puede notar que:
+\begin{equation*}
+  \begin{aligned}
+    NOT\ TRUE &\equiv (\lambda b.\lambda x.\lambda y.\ byx)(\lambda x.\lambda y.\ x) \\ 
+              &\Rightarrow \lambda x.\lambda y.\ (\lambda s.\lambda t.\ s)yx
+  \end{aligned}
+\end{equation*}
+para ambos órdenes.
+
+\section*{Ejercicio 8}
+Suponiendo que $e_0$ y $e_1$ son formas canónicas, podemos ver la evaluación de cada una de las expresiones por separado.
+
+\subsection*{Item A}
+\begin{equation*}
+  \begin{aligned}
+    &NOT\ TRUE\ e_0 e_1 \Rightarrow_E \\ 
+    &\quad\left[
+      \begin{aligned}
+        &NOT\ TRUE\ e_0 \Rightarrow_E \\
+        &\quad\left[
+          \begin{aligned}
+            &NOT\ TRUE \equiv (\lambda b.\lambda x.\lambda y.\ byx)(\lambda x.\lambda y.\ x) \Rightarrow_E \\ 
+            &\quad\left[
+              \begin{aligned}
+                &\lambda b.\lambda x.\lambda y.\ byx \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\
+            &\quad\left[
+              \begin{aligned}
+                &\lambda x.\lambda y.\ x \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\
+            &\quad\left[
+              \begin{aligned}
+                &(\lambda x.\lambda y.\ byx) / b \to (\lambda x.\lambda y.\ x) \equiv \lambda x.\lambda y.\ (\lambda r.\lambda s.\ r)yx \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\ 
+            &\Rightarrow_E \lambda x.\lambda y.\ (\lambda r.\lambda s.\ r)yx 
+          \end{aligned}
+        \right. \\
+        &\quad\left[
+          \begin{aligned}
+            &e_0 \Rightarrow_E \dots
+          \end{aligned}
+        \right. \\
+        &\quad\left[
+          \begin{aligned}
+            &(\lambda y.\ (\lambda r.\lambda s.\ r)yx) / x \to e_0 \equiv \lambda y.\ (\lambda r.\lambda s.\ r)ye_0 \Rightarrow_E \dots
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_E \lambda y.\ (\lambda r.\lambda s.\ r)ye_0 
+      \end{aligned}
+    \right. \\
+    &\quad\left[
+      \begin{aligned}
+        &e_1 \Rightarrow_E \dots
+      \end{aligned}
+    \right. \\ 
+    &\quad\left[
+      \begin{aligned}
+        &(\lambda r.\lambda s.\ r)ye_0 / y \to e_1 \equiv (\lambda r.\lambda s.\ r) e_1 e_0 \Rightarrow_E \\ 
+        &\quad\left[
+          \begin{aligned}
+            &(\lambda r.\lambda s.\ r) e_1 \Rightarrow_E \\
+            &\quad\left[
+              \begin{aligned}
+                &\lambda r.\lambda s.\ r \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\ 
+            &\quad\left[
+              \begin{aligned}
+                &e_1 \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\ 
+            &\quad\left[
+              \begin{aligned}
+                &(\lambda s.\ r) / r \to e_1 \equiv \lambda s.\ e_1 \Rightarrow_E \dots
+              \end{aligned}
+            \right. \\ 
+            &\Rightarrow_E \lambda s.\ e_1
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &e_0 \Rightarrow_E \dots
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &e_1 / s \to e_0 \equiv e_1 \Rightarrow_E \dots
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_E e_1
+      \end{aligned}
+    \right. \\ 
+    &\Rightarrow_E e_1
+  \end{aligned}
+\end{equation*}
+
+\subsection*{Item B}
+\begin{equation*}
+  \begin{aligned}
+    &AND\ FALSE\ (\Delta\Delta) e_0 e_1 \Rightarrow_N \\ 
+    &\quad\left[
+      \begin{aligned}
+        &AND\ FALSE\ (\Delta\Delta) e_0 \Rightarrow_N \\
+        &\quad\left[
+          \begin{aligned}
+            &AND\ FALSE\ (\Delta\Delta) \Rightarrow_N \\
+            &\quad\left[
+              \begin{aligned}
+                &AND\ FALSE \Rightarrow_N \\
+                &\quad\left[
+                  \begin{aligned}
+                    &AND \equiv \lambda b.\lambda c.\lambda x.\lambda y.\ b(cxy)y \Rightarrow_N \dots
+                  \end{aligned}
+                \right. \\ 
+                &\quad\left[
+                  \begin{aligned}
+                    &(\lambda c.\lambda x.\lambda y.\ b(cxy)y) / b \to FALSE \equiv \lambda c.\lambda x.\lambda y.\ FALSE(cxy)y \Rightarrow_N \dots
+                  \end{aligned}
+                \right. \\ 
+                &\Rightarrow_N \lambda c.\lambda x.\lambda y.\ FALSE(cxy)y
+              \end{aligned}
+            \right. \\ 
+            &\quad\left[
+              \begin{aligned}
+                &(\lambda x.\lambda y. FALSE(cxy)y) / c \to (\Delta\Delta) \equiv \lambda x.\lambda y.\ FALSE((\Delta\Delta)xy)y \Rightarrow_N \dots
+              \end{aligned}
+            \right. \\ 
+            &\Rightarrow_N \lambda x.\lambda y.\ FALSE((\Delta\Delta)xy)y 
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &(\lambda y.\ FALSE((\Delta\Delta)xy)y) / x \to e_0 \equiv \lambda y.\ FALSE((\Delta\Delta)e_0y)y \Rightarrow_N \dots
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_N \lambda y.\ FALSE((\Delta\Delta)e_0y)y
+      \end{aligned}
+    \right. \\ 
+    &\quad\left[
+      \begin{aligned}
+        &(FALSE((\Delta\Delta)e_0y)y) / y \to e_1 \equiv FALSE((\Delta\Delta)e_0e_1)e_1 \Rightarrow_N \\
+        &\quad\left[
+          \begin{aligned}
+            &FALSE((\Delta\Delta)e_0e_1) \equiv (\lambda x.\lambda y.\ y)((\Delta\Delta)e_0e_1) \Rightarrow_N \\ 
+            &\quad\left[
+              \begin{aligned}
+                &\lambda x.\lambda y.\ y \Rightarrow_N \dots
+              \end{aligned}
+            \right. \\ 
+            &\quad\left[
+              \begin{aligned}
+                &(\lambda y.\ y) / x \to ((\Delta\Delta)e_0e_1) \equiv \lambda y.\ y \Rightarrow_N \dots
+              \end{aligned}
+            \right. \\ 
+            &\Rightarrow_N \lambda y.\ y
+          \end{aligned}
+        \right. \\ 
+        &\quad\left[
+          \begin{aligned}
+            &(y) / y \to e_1 \equiv e_1
+          \end{aligned}
+        \right. \\ 
+        &\Rightarrow_N e_1
+      \end{aligned}
+    \right. \\ 
+    &\Rightarrow_N e_1
+  \end{aligned}
+\end{equation*}
+
+\section*{Ejercicio 9}
+Ninguna tiene forma canónica y es debido a que el orden eager implica que se debe evaluar el argumento.
+Luego, en algún momento se debe evaluar $\Delta\Delta$ en el primer caso y $\lambda w.\ \Delta\Delta$ en el segundo, las cuales no tienen forma canónica (i.e., no terminan).
+
+\section*{Ejercicio 10}
+Me lo salto porque interpreto que al no ser una abstracción sino una aplicación, entonces no se puede aplicar la contracción $\eta$.
+
+\end{document}
