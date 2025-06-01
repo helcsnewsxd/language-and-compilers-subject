@@ -1,0 +1,250 @@
+\documentclass{article}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\usepackage{titling}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage{enumitem}
+\usepackage[dvipsnames]{xcolor}
+
+\geometry{
+  a4paper,
+  total = {170mm, 257mm},
+  left = 20mm,
+  top = 20mm,
+}
+\graphicspath{ {./images/} }
+
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{lemma}[theorem]{Lema}
+
+\newtheorem*{theorem*}{Teorema}
+\newtheorem*{lemma*}{Lema}
+
+\newcommand{\addfig}[2]{\begin{figure}[!htb] \centering \includegraphics[width=#1\textwidth]{#2}\end{figure}}
+
+\newcommand{\aexp}[1]{\langle\text{#1}\rangle}
+\newcommand{\intexp}{\aexp{intexp}}
+\newcommand{\var}{\aexp{var}}
+\newcommand{\assert}{\aexp{assert}}
+\newcommand{\boolexp}{\aexp{boolexp}}
+\newcommand{\comm}{\aexp{comm}}
+\newcommand{\sem}[1]{\left\llbracket #1\right\rrbracket}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\B}{\mathbb{B}}
+
+\newcommand{\x}{\textbf{x}}
+\newcommand{\y}{\textbf{y}}
+\newcommand{\z}{\textbf{z}}
+
+\newcommand{\supr}{\bigsqcup\limits}
+
+\newcommand{\concat}{\texttt{ ++ }}
+
+\newcommand{\fleq}{\sqsubseteq}
+\newcommand{\cdom}{\Sigma \to \Sigma_\bot}
+\newcommand{\cdomf}{\Sigma \to \Sigma_\bot'}
+\newcommand{\cdomfo}{\Sigma \to \Omega}
+\newcommand{\cfbot}{\bot_{\cdom}}
+\newcommand{\cfbotf}{\bot_{\cdomf}}
+\newcommand{\cfbotfo}{\bot_{\cdomfo}}
+\newcommand{\bbot}{\bot\!\!\!\bot}
+\newcommand{\ctrue}{\textbf{true}}
+\newcommand{\cfalse}{\textbf{false}}
+\newcommand{\cskip}{\textbf{skip}}
+\newcommand{\cif}[3]{\textbf{if }#1\textbf{ then }#2\textbf{ else }#3}
+\newcommand{\cnewvar}[3]{\textbf{newvar }#1 := #2\textbf{ in }#3}
+\newcommand{\cwhile}[2]{\textbf{while }#1\textbf{ do }#2}
+\newcommand{\cfor}[4]{\textbf{for }#1 := #2\text{ to }#3\text{ do }#4}
+\newcommand{\cfail}{\textbf{fail}}
+\newcommand{\ccatch}[2]{\textbf{catchin }#1\textbf{ with }#2}
+\newcommand{\cabort}[1]{\langle\textbf{abort}, #1\rangle}
+\newcommand{\cout}[1]{\langle #1\rangle}
+
+\newcommand{\iterm}[1]{\iota_\text{term}\left(#1\right)}
+\newcommand{\iabort}[1]{\iota_\text{abort}\left(#1\right)}
+\newcommand{\iout}[2]{\iota_\text{out}\left(#1,\ #2\right)}
+\newcommand{\iin}[2]{\iota_\text{in}\left(\lambda #1 \in \Z .\ #2\right)}
+
+\newcommand{\ibot}{\iota_\bot}
+
+\title{Trabajo práctico N° 8}
+\author{Emanuel Nicolás Herrador}
+\date{Mayo 2025}
+
+\makeatletter
+\def\@maketitle{%
+  \newpage
+  \null
+  \vskip 1em%
+  \begin{center}%
+  \let \footnote \thanks
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+\makeatother
+
+\begin{document}
+
+\maketitle
+
+\noindent\begin{tabular}{@{}ll}
+	Estudiante & \theauthor \\
+\end{tabular}
+
+\section*{Ejercicio 1}
+Veamos la semántica denotacional en $D_\infty$ para cada uno de los términos separados en items.
+
+\subsection*{Item A}
+Queremos ver la semántica de $M = \lambda f.\lambda x.\ f(fx)$.
+Veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{M}\eta &= \sem{\lambda f.\lambda x.\ f(fx)}\eta \\ 
+                &= \psi(\lambda c.\ \sem{\lambda x.\ f(fx)}[\eta\ |\ f : c]) \\ 
+                &= \psi(\lambda c.\ \psi(\lambda d.\ \sem{f(fx)}[\eta\ |\ f : c\ |\ x : d])) \\ 
+                &= \psi(\lambda c.\ \psi(\lambda d.\ \varphi(\sem{f}[\eta\ |\ f : c\ |\ x : d])(\sem{fx}[\eta\ |\ f : c\ |\ x : d]))) \\ 
+                &= \psi(\lambda c.\ \psi(\lambda d.\ \varphi c (\sem{fx}[\eta\ |\ f : c\ |\ x : d]))) \\ 
+                &= \psi(\lambda c.\ \psi(\lambda d.\ \varphi c (\varphi(\sem{f}[\eta\ |\ f : c\ |\ x : d])(\sem{x}[\eta\ |\ f : c\ |\ x : d])))) \\ 
+                &= \psi(\lambda c.\ \psi(\lambda d.\ \varphi c (\varphi c d))) \\ 
+  \end{aligned}
+\end{equation*}
+
+\subsection*{Item B}
+Se pretende ver la semántica de $N = \lambda z.\lambda y.\ z$.
+Veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{N}\eta &= \sem{\lambda z.\lambda y.\ z}\eta \\ 
+                &= \psi(\lambda c.\ \sem{\lambda y.\ z}[\eta\ |\ z : c]) \\ 
+                &= \psi(\lambda c.\ \psi(\lambda d.\ \sem{z}[\eta\ |\ z : c\ |\ y : d])) \\ 
+                &= \psi(\lambda c.\ \psi(\lambda d.\ c)) \\ 
+  \end{aligned}
+\end{equation*}
+
+\subsection*{Item C}
+Ahora queremos ver la semántica de $MN$.
+Para ello, veamos que:
+\begin{equation*}
+  \begin{aligned}
+    \sem{MN}\eta &= \varphi(\sem{M}\eta)(\sem{N}\eta) \\ 
+                 &= \varphi\ (\psi(\lambda c.\ \psi(\lambda d.\ \varphi c (\varphi c d))))\ (\psi(\lambda e.\ \psi(\lambda f.\ e))) \\ 
+                 &= (\lambda c.\ \psi(\lambda d.\ \varphi c (\varphi c d))) (\psi(\lambda e.\ \psi(\lambda f.\ e))) \\ 
+                 &= \psi(\lambda d.\ \varphi\ (\psi(\lambda e.\ \psi(\lambda f.\ e)))\ (\varphi\ (\psi(\lambda e.\ \psi(\lambda f.\ e)))\ d)) \\ 
+                 &= \psi(\lambda d.\ (\lambda e.\ \psi(\lambda f.\ e))\ ((\lambda e.\ \psi(\lambda f.\ e))\ d)) \\ 
+                 &= \psi(\lambda d.\ (\lambda e.\ \psi(\lambda f.\ e))\ (\psi(\lambda f.\ d))) \\ 
+                 &= \psi(\lambda d.\ \psi(\lambda f.\ \psi(\lambda f'.\ d)))
+  \end{aligned}
+\end{equation*}
+
+\section*{Ejercicio 2}
+Los enuncio pero no los voy a demostrar.
+
+\begin{theorem*}[Renombre]
+  Si $v' \notin FVe - \{v\}$, entonces $\sem{\lambda v'.\ (e / v \to v')} = \sem{\lambda v.\ e}$.
+\end{theorem*}
+
+\begin{theorem*}[Coincidencia]
+  Si $\eta w = \eta' w$ para todo $w \in FVe$, entonces $\sem{e}\eta = \sem{e}\eta'$.
+\end{theorem*}
+
+\begin{theorem*}[Corrección de la regla $\beta$]
+  $\sem{(\lambda v.\ e)e'} = \sem{e / v \to e'}$.
+\end{theorem*}
+
+\begin{theorem*}[Corrección de la regla $\eta$]
+  Si $v \notin FVe$, entonces $\sem{\lambda v.\ ev} = \sem{e}$.
+\end{theorem*}
+
+\section*{Ejercicio 3}
+El objetivo es dar un término cerrado $M$ cuya denotación en la semántica normal sea:
+\begin{enumerate}[label=(\alph*)]
+  \item Distinto a $\bot$ pero que para todos $N$ y $\eta$, $\sem{MN}\eta = \bot$:
+
+    Podemos tomar $M = \lambda v.\ (\Delta\Delta)$ porque $\sem{M}\eta \neq \bot$ y:
+    \begin{equation*}
+      \begin{aligned}
+        \sem{MN}\eta &= \varphi_{\bbot}\ (\sem{M}\eta)\ (\sem{N}\eta) \\ 
+                     &= \varphi_{\bbot}\ (\sem{\lambda v.\ (\Delta\Delta)}\eta)\ (\sem{N}\eta) \\ 
+                     &= \varphi_{\bbot}\ (\ibot\psi(\lambda d.\ \sem{\Delta\Delta}[\eta\ |\ v : d]))\ (\sem{N}\eta) \\ 
+                     &= \varphi_{\bbot}\ (\ibot\psi(\lambda d.\ \bot))\ (\sem{N}\eta) \\ 
+                     &= (\lambda d.\ \bot)\ (\sem{N}\eta) \\ 
+                     &= \bot
+      \end{aligned}
+    \end{equation*}
+
+  \item Distinto a $\bot$ y $\sem{M(\Delta\Delta)}\eta \neq \bot$:
+
+    Podemos tomar $M = \lambda x.\lambda y.\ y$ porque $\sem{M}\eta \neq \bot$ y:
+    \begin{equation*}
+      \begin{aligned}
+        \sem{M(\Delta\Delta)}\eta &= \varphi_{\bbot}\ (\sem{M}\eta)\ (\sem{\Delta\Delta}\eta) \\ 
+                                  &= \varphi_{\bbot}\ (\sem{\lambda x.\lambda y.\ y}\eta)\ \bot \\ 
+                                  &= \varphi_{\bbot}\ (\ibot\psi(\lambda d.\ \sem{\lambda y.\ y}[\eta\ |\ x : d]))\ \bot \\ 
+                                  &= \varphi_{\bbot}\ (\ibot\psi(\lambda d.\ \ibot\psi(\lambda e.\ \sem{y}[\eta\ |\ x : d\ |\ y : e])))\ \bot \\ 
+                                  &= \varphi_{\bbot}\ (\ibot\psi(\lambda d.\ \ibot\psi(\lambda e.\ e)))\ \bot \\ 
+                                  &= (\lambda d.\ \ibot\psi(\lambda e.\ e))\ \bot \\ 
+                                  &= \ibot\psi(\lambda e.\ e) \\ 
+                                  &\neq \bot
+      \end{aligned}
+    \end{equation*}
+\end{enumerate}
+
+\section*{Ejercicio 4}
+La semántica eager de $\sem{M(\Delta\Delta)}\eta$ dado en $(3b)$ es $\bot$ porque en el orden eager siempre se evalúan también los argumentos.
+Motivo de ello, como $\sem{\Delta\Delta}\eta = \bot$, la semántica de la aplicación también es $\bot$.
+
+Se puede ver por la definición porque en eager la aplicación se define como $\sem{e_0e_1}\eta = \varphi_{\bbot}\ (\sem{e_0}\eta)_{\bbot}\ (\sem{e_1}\eta)$.
+Luego, si $\sem{e_1}\eta = \bot$, por el segundo $_{\bbot}$ todo es $\bot$.
+
+\section*{Ejercicio 5}
+Si consideramos la semántica denotacional normal del cálculo lambda, entonces tenemos que:
+\begin{enumerate}[label=(\alph*)]
+  \item \textit{Teorema de sustitución}: Vale.
+  \item \textit{Corrección de la regla $\beta$}: Vale.
+  \item \textit{Corrección de la regla $\eta$}: No vale por el caso $\sem{\lambda v.\ (\Delta\Delta)v}\eta \neq \bot = \sem{\Delta\Delta}\eta$.
+\end{enumerate}
+
+\section*{Ejercicio 6}
+Si consideramos la semántica denotacional eager del cálculo lambda, entonces tenemos que:
+\begin{enumerate}[label=(\alph*)]
+  \item \textit{Teorema de sustitución}: No vale porque $\sem{\delta w}\eta \in V_\bot$ y $\eta' w \in V$ por lo que son incomparables.
+  \item \textit{Corrección de la regla $\beta$}: No vale por el caso $\sem{(\lambda v.\lambda x.\ x)(\Delta\Delta)}\eta = \bot \neq \sem{\lambda x.\ x}$.
+  \item \textit{Corrección de la regla $\eta$}: No vale por mismo caso que con orden normal.
+\end{enumerate}
+
+\section*{Ejercicio 7}
+\begin{theorem*}[TS para Eager]
+  Si $\sem{\delta w}\eta = \ibot(\eta'w)$ para toda $w \in FVe$, entonces $\sem{e/d}\eta = \sem{e}\eta'$.
+\end{theorem*}
+
+\section*{Ejercicio 8}
+Se pretende ver cuáles de las siguientes afirmaciones son verdaderas y cuáles falsas, justificando el porqué.
+
+En el caso de los items $(a)$ a $(d)$, estos son imprecisos porque los entornos son distintos.
+
+Respecto al item $(e)$, no se define un isomorfismo en normal con $\varphi_{\bbot}$ y $\ibot\psi$ porque $\forall f \in [D \to D],\ \ibot\psi f \neq \bot_D$ por lo que la segunda no es suryectiva.
+
+Por último, respecto al item $(f)$, este es falso porque:
+\begin{equation*}
+  \begin{aligned}
+    \varphi_{\bbot} &\in V_\bot \to [V \to V_\bot] \\ 
+    \ibot \circ \psi &\in [V \to V_\bot] \to V_\bot \\ 
+    \varphi_{\bbot} \circ (\ibot \circ \psi) &\in V_\bot \to V_\bot 
+  \end{aligned}
+\end{equation*}
+
+Luego, los dominios son distintos por lo que no se cumple.
+
+\end{document}
