@@ -1,0 +1,6 @@
+[submodule "decompilation-report"]
+	path = decompilation-report
+	url = https://github.com/helcsnewsxd/decompilation-report
+[submodule "gsc-interpreter"]
+	path = gsc-interpreter
+	url = https://github.com/helcsnewsxd/gsc-interpreter
